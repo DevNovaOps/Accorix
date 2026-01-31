@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Users - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        User Management
+        <a href="{% url 'create_user' %}" class="btn-primary">+ Create User</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Login ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_obj in users %}
+                <tr>
+                    <td>{{ user_obj.get_full_name|default:user_obj.username }}</td>
+                    <td>{{ user_obj.login_id }}</td>
+                    <td>{{ user_obj.email }}</td>
+                    <td>
+                        <span class="status-badge {% if user_obj.role == 'admin' %}status-paid{% else %}status-pending{% endif %}">
+                            {{ user_obj.get_role_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge {% if user_obj.is_active %}status-paid{% else %}status-not-paid{% endif %}">
+                            {% if user_obj.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center; color:var(--muted); padding:40px;">
+                        No users found. <a href="{% url 'create_user' %}" style="color:var(--primary);">Create your first user</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

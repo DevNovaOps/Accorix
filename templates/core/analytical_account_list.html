@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytical Accounts - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        Analytical Accounts
+        <a href="{% url 'analytical_account_create' %}" class="btn-primary">+ Create Account</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td style="font-family:monospace; font-weight:600;">{{ account.code }}</td>
+                    <td>{{ account.name }}</td>
+                    <td style="color:var(--muted);">{{ account.description|truncatewords:10|default:"-" }}</td>
+                    <td>
+                        <span class="status-badge {% if account.is_active %}status-paid{% else %}status-not-paid{% endif %}">
+                            {% if account.is_active %}Active{% else %}Archived{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                        <div style="display:flex; gap:10px;">
+                            <a href="{% url 'analytical_account_edit' account.pk %}" style="color:var(--primary);">Edit</a>
+                            {% if account.is_active %}
+                            <a href="{% url 'analytical_account_archive' account.pk %}" style="color:var(--danger);">Archive</a>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <span style="color:var(--muted);">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center; color:var(--muted); padding:40px;">
+                        No analytical accounts found. <a href="{% url 'analytical_account_create' %}" style="color:var(--primary);">Create your first account</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

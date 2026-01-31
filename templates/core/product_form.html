@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">{{ title }}</div>
+
+    <div class="card">
+        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Product Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>SKU *</label>
+                {{ form.sku }}
+                {% if form.sku.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.sku.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.category.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Unit Price *</label>
+                {{ form.unit_price }}
+                {% if form.unit_price.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.unit_price.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Save Product</button>
+                <a href="{% url 'product_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Make Payment - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">Make Payment</div>
+
+    <div class="card">
+        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+            {% csrf_token %}
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Date *</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Amount *</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.amount.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Customer Invoice</label>
+                    {{ form.customer_invoice }}
+                    {% if form.customer_invoice.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.customer_invoice.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Vendor Bill</label>
+                    {{ form.vendor_bill }}
+                    {% if form.vendor_bill.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.vendor_bill.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Reference</label>
+                    {{ form.reference }}
+                    {% if form.reference.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.reference.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.notes.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="padding:15px; background:rgba(0,245,255,0.1); border:1px solid var(--primary); border-radius:8px; margin-top:10px;">
+                <div style="font-size:0.9rem; color:var(--text);">
+                    <strong>Note:</strong> This payment will be processed through the configured payment provider. 
+                    Payment status will be updated automatically upon confirmation.
+                </div>
+            </div>
+
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Submit Payment</button>
+                <a href="{% url 'portal_dashboard' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

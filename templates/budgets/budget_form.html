@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">{{ title }}</div>
+
+    <div class="card">
+        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Budget Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Analytical Account *</label>
+                {{ form.analytical_account }}
+                {% if form.analytical_account.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.analytical_account.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.start_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>End Date *</label>
+                    {{ form.end_date }}
+                    {% if form.end_date.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.end_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Budgeted Amount *</label>
+                {{ form.budgeted_amount }}
+                {% if form.budgeted_amount.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.budgeted_amount.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.notes.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            {% if budget %}
+            <div class="form-group">
+                <label>Revision Reason (if changing amount)</label>
+                <input type="text" name="revision_reason" class="form-control" placeholder="Reason for budget revision">
+            </div>
+            {% endif %}
+
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Save Budget</button>
+                <a href="{% url 'budget_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

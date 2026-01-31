@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Bill Detail - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        {{ bill.transaction_number }}
+        {% if bill.payment_status != 'paid' %}
+        <a href="{% url 'portal_payment_bill' bill.pk %}" class="btn-primary">Pay Bill</a>
+        {% endif %}
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;">
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Bill Details</h3>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted);">Date</div>
+                    <div style="font-weight:600;">{{ bill.date }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted);">Due Date</div>
+                    <div style="font-weight:600;">{{ bill.due_date }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted);">Payment Status</div>
+                    <div>
+                        <span class="status-badge {% if bill.payment_status == 'paid' %}status-paid{% elif bill.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                            {{ bill.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Vendor</h3>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="font-weight:600;">{{ bill.contact.name }}</div>
+                <div style="color:var(--muted); font-size:0.9rem;">{{ bill.contact.email }}</div>
+                {% if bill.contact.address %}
+                <div style="color:var(--muted); font-size:0.9rem;">{{ bill.contact.address }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th style="text-align:right;">Quantity</th>
+                    <th style="text-align:right;">Unit Price</th>
+                    <th style="text-align:right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in bill.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td style="text-align:right;">{{ item.quantity }}</td>
+                    <td style="text-align:right;">${{ item.unit_price|floatformat:2 }}</td>
+                    <td style="text-align:right;">${{ item.line_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="font-weight:700; font-size:1.1rem;">
+                    <td colspan="3" style="text-align:right; padding-top:15px;">Total:</td>
+                    <td style="text-align:right; padding-top:15px;">${{ bill.total_amount|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}

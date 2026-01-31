@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bills - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">My Bills</div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bill #</th>
+                    <th>Date</th>
+                    <th>Due Date</th>
+                    <th>Amount</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr>
+                    <td>{{ bill.transaction_number }}</td>
+                    <td>{{ bill.date }}</td>
+                    <td>{{ bill.due_date }}</td>
+                    <td>${{ bill.total_amount|floatformat:2 }}</td>
+                    <td>
+                        <span class="status-badge {% if bill.payment_status == 'paid' %}status-paid{% elif bill.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                            {{ bill.get_payment_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'portal_bill_detail' bill.pk %}" style="color:var(--primary); margin-right:10px;">View</a>
+                        {% if bill.payment_status != 'paid' %}
+                        <a href="{% url 'portal_payment_bill' bill.pk %}" style="color:var(--primary);">Pay</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:var(--muted); padding:40px;">
+                        No bills found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

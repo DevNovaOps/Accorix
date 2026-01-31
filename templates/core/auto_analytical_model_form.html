@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">{{ title }}</div>
+
+    <div class="card">
+        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Analytical Account *</label>
+                {{ form.analytical_account }}
+                {% if form.analytical_account.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.analytical_account.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Product Category</label>
+                    {{ form.product_category }}
+                    {% if form.product_category.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.product_category.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Product Name Contains</label>
+                    {{ form.product_name_contains }}
+                    {% if form.product_name_contains.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.product_name_contains.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Contact Type</label>
+                    {{ form.contact_type }}
+                    {% if form.contact_type.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.contact_type.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.priority.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    {{ form.is_active }}
+                    <span>Active</span>
+                </label>
+            </div>
+
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Save Model</button>
+                <a href="{% url 'auto_analytical_model_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

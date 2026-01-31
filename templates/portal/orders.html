@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">My Orders</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Purchase Orders</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>PO #</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for po in purchase_orders %}
+                    <tr>
+                        <td>{{ po.transaction_number }}</td>
+                        <td>{{ po.date }}</td>
+                        <td>${{ po.total_amount|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align:center; color:var(--muted); padding:20px;">No purchase orders found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Sales Orders</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SO #</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for so in sales_orders %}
+                    <tr>
+                        <td>{{ so.transaction_number }}</td>
+                        <td>{{ so.date }}</td>
+                        <td>${{ so.total_amount|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align:center; color:var(--muted); padding:20px;">No sales orders found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Payments - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        Payments
+        <a href="{% url 'payment_create' %}" class="btn-primary">+ Record Payment</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Payment #</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Invoice/Bill</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.payment_number }}</td>
+                    <td>{{ payment.date }}</td>
+                    <td>${{ payment.amount|floatformat:2 }}</td>
+                    <td>{{ payment.get_payment_method_display }}</td>
+                    <td>
+                        {% if payment.customer_invoice %}
+                        {{ payment.customer_invoice.transaction_number }}
+                        {% elif payment.vendor_bill %}
+                        {{ payment.vendor_bill.transaction_number }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center; color:var(--muted); padding:40px;">
+                        No payments found. <a href="{% url 'payment_create' %}" style="color:var(--primary);">Record your first payment</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

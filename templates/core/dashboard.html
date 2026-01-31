@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        Dashboard Overview
+        <span style="font-size:0.9rem; color:var(--muted); font-weight:400;">FY 2024-2025</span>
+    </div>
+    
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Budget</div>
+            <div class="kpi-value">${{ total_budgeted|default:"0"|floatformat:2 }}</div>
+        </div>
+        <div class="kpi-card secondary">
+            <div class="kpi-label">Actual Expense</div>
+            <div class="kpi-value">${{ total_actual|default:"0"|floatformat:2 }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Total Invoices</div>
+            <div class="kpi-value">{{ total_invoices|default:"0" }}</div>
+        </div>
+        <div class="kpi-card secondary">
+            <div class="kpi-label">Active Budgets</div>
+            <div class="kpi-value">{{ active_budgets|default:"0" }}</div>
+        </div>
+    </div>
+
+    {% if user.role == 'admin' %}
+    <div class="card">
+        <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Recent Invoices</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Contact</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in recent_invoices|slice:":5" %}
+                <tr>
+                    <td>{{ invoice.transaction_number }}</td>
+                    <td>{{ invoice.contact.name }}</td>
+                    <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                    <td>
+                        <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                            {{ invoice.get_payment_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align:center; color:var(--muted);">No invoices yet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif user.role == 'portal' %}
+    <div class="card">
+        <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">My Recent Invoices</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices|slice:":5" %}
+                <tr>
+                    <td>{{ invoice.transaction_number }}</td>
+                    <td>{{ invoice.date }}</td>
+                    <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                    <td>
+                        <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                            {{ invoice.get_payment_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align:center; color:var(--muted);">No invoices found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

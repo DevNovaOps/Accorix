@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ERP Budget – Admin Dashboard{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- ================= TOP MENU ================= -->
+<div class="top-menu">
+    
+    <div class="menu-group">
+        <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="window.location='{% url 'dashboard' %}'">
+            <div style="width:40px; height:40px; color:var(--primary);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:100%; height:100%;">
+                    <path d="M12 2L2 19h20L12 2zm0 3.8L17.5 17h-11L12 5.8z" style="opacity:0.4;" />
+                    <path d="M13.5 10l-2.5 4.5h-3l4-7 5 9h-2l-1.5-2.5z" style="fill:var(--secondary);"/> 
+                    <path d="M16 8l4-2v2m-2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div style="display:flex; flex-direction:column;">
+                <h3 style="margin:0; color:var(--text); font-size:20px; font-weight:800; letter-spacing:1px; line-height:1;">ACCORIX</h3>
+                <span style="font-size:10px; color:var(--muted); font-weight:600; letter-spacing:0.3em; text-transform:uppercase;">Finance OS</span>
+            </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        {% if user.role == 'admin' or user.role == 'invoicing' %}
+        <div class="menu-item">
+            Account
+            <div class="dropdown-panel">
+                <a href="{% url 'contact_list' %}">Contact</a>
+                <a href="{% url 'product_list' %}">Product</a>
+                <a href="{% url 'analytical_account_list' %}">Analytical Accounts</a>
+                <a href="{% url 'auto_analytical_model_list' %}">Auto Analytic Model</a>
+                <a href="{% url 'budget_list' %}">Budget</a>
+            </div>
+        </div>
+
+        <!-- PURCHASE -->
+        <div class="menu-item">
+            Purchase
+            <div class="dropdown-panel">
+                <a href="{% url 'purchase_order_list' %}">Purchase Order</a>
+                <a href="{% url 'vendor_bill_list' %}">Purchase Bill</a>
+                <a href="{% url 'payment_list' %}">Payment</a>
+            </div>
+        </div>
+
+        <!-- SALE -->
+        <div class="menu-item">
+            Sale
+            <div class="dropdown-panel">
+                <a href="{% url 'sales_order_list' %}">Sale Order</a>
+                <a href="{% url 'customer_invoice_list' %}">Sale Invoice</a>
+                <a href="{% url 'payment_list' %}">Receipt</a>
+            </div>
+        </div>
+        
+        <!-- REPORTS -->
+        <div class="menu-item">
+            <a href="{% url 'budget_dashboard' %}" style="text-decoration:none; color:inherit;">Reports</a>
+        </div>
+        {% endif %}
+        
+        {% if user.role == 'portal' %}
+        <div class="menu-item">
+            <a href="{% url 'portal_dashboard' %}" style="text-decoration:none; color:inherit;">My Dashboard</a>
+        </div>
+        <div class="menu-item">
+            <a href="{% url 'portal_invoices' %}" style="text-decoration:none; color:inherit;">My Invoices</a>
+        </div>
+        <div class="menu-item">
+            <a href="{% url 'portal_bills' %}" style="text-decoration:none; color:inherit;">My Bills</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT ACTIONS -->
+    <div class="header-actions">
+        {% if user.role == 'admin' %}
+        <div onclick="window.location='{% url 'user_list' %}'" style="cursor:pointer; color:var(--muted); font-size:0.9rem;">Users</div>
+        {% endif %}
+        <button class="action-btn" id="themeToggle" title="Toggle Theme">🌓</button>
+        <a href="{% url 'logout' %}" class="action-btn" style="color:var(--danger)" title="Logout">⏻</a>
+    </div>
+
+</div>
+
+<!-- ================= CONTENT AREA ================= -->
+<div class="content-wrapper" id="pageContent">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endif %}
+
+{% if not user.is_authenticated %}
+    {% if messages %}
+    <div class="messages" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; max-width: 500px;">
+        {% for message in messages %}
+        <div class="message {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endif %}
+
+{% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+</div>
+{% endif %}
+
+<script>
+// Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+
+function initTheme() {
+    const saved = localStorage.getItem('erp-theme') || 'dark';
+    html.setAttribute('data-theme', saved);
+    if (themeToggle) {
+        themeToggle.textContent = saved === 'dark' ? '☀' : '☾';
+    }
+}
+
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('erp-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀' : '☾';
+    });
+}
+
+initTheme();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

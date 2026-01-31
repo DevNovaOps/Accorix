@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Contacts - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        Contacts
+        <a href="{% url 'contact_create' %}" class="btn-primary">+ Create Contact</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr>
+                    <td>{{ contact.name }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td>{{ contact.phone|default:"-" }}</td>
+                    <td>{{ contact.get_contact_type_display }}</td>
+                    <td>
+                        <span class="status-badge {% if contact.is_active %}status-paid{% else %}status-not-paid{% endif %}">
+                            {% if contact.is_active %}Active{% else %}Archived{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                        <div style="display:flex; gap:10px;">
+                            <a href="{% url 'contact_edit' contact.pk %}" style="color:var(--primary);">Edit</a>
+                            {% if contact.is_active %}
+                            <a href="{% url 'contact_archive' contact.pk %}" style="color:var(--danger);">Archive</a>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <span style="color:var(--muted);">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:var(--muted); padding:40px;">
+                        No contacts found. <a href="{% url 'contact_create' %}" style="color:var(--primary);">Create your first contact</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

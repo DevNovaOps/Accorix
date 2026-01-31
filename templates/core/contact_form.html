@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">{{ title }}</div>
+
+    <div class="card">
+        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Email *</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Phone</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.phone.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Contact Type *</label>
+                {{ form.contact_type }}
+                {% if form.contact_type.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.contact_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Address</label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.address.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Save Contact</button>
+                <a href="{% url 'contact_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

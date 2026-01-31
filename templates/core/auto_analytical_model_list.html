@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Auto Analytical Models - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        Auto Analytical Models
+        <a href="{% url 'auto_analytical_model_create' %}" class="btn-primary">+ Create Model</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Analytical Account</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in models %}
+                <tr>
+                    <td>{{ model.name }}</td>
+                    <td>{{ model.analytical_account }}</td>
+                    <td>{{ model.priority }}</td>
+                    <td>
+                        <span class="status-badge {% if model.is_active %}status-paid{% else %}status-not-paid{% endif %}">
+                            {% if model.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                        <div style="display:flex; gap:10px;">
+                            <a href="{% url 'auto_analytical_model_edit' model.pk %}" style="color:var(--primary);">Edit</a>
+                            {% if model.is_active %}
+                            <a href="{% url 'auto_analytical_model_archive' model.pk %}" style="color:var(--danger);">Archive</a>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <span style="color:var(--muted);">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center; color:var(--muted); padding:40px;">
+                        No models found. <a href="{% url 'auto_analytical_model_create' %}" style="color:var(--primary);">Create your first model</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

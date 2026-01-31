@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Portal Dashboard - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">My Dashboard</div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">My Invoices</div>
+            <div class="kpi-value">{{ invoices|length|default:"0" }}</div>
+        </div>
+        <div class="kpi-card secondary">
+            <div class="kpi-label">Pending Payment</div>
+            <div class="kpi-value">
+                ${{ invoices|default_if_none:""|sum:"remaining_amount"|default:"0.00"|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Recent Invoices</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices|slice:":5" %}
+                    <tr>
+                        <td>{{ invoice.transaction_number }}</td>
+                        <td>{{ invoice.date }}</td>
+                        <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                        <td>
+                            <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                                {{ invoice.get_payment_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'portal_invoice_detail' invoice.pk %}" style="color:var(--primary); margin-right:10px;">View</a>
+                            {% if invoice.payment_status != 'paid' %}
+                            <a href="{% url 'portal_payment_invoice' invoice.pk %}" style="color:var(--primary);">Pay</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:var(--muted); padding:20px;">No invoices found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if invoices|length > 5 %}
+            <div style="margin-top:15px; text-align:center;">
+                <a href="{% url 'portal_invoices' %}" style="color:var(--primary);">View All Invoices</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Recent Bills</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill #</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills|slice:":5" %}
+                    <tr>
+                        <td>{{ bill.transaction_number }}</td>
+                        <td>{{ bill.date }}</td>
+                        <td>${{ bill.total_amount|floatformat:2 }}</td>
+                        <td>
+                            <span class="status-badge {% if bill.payment_status == 'paid' %}status-paid{% elif bill.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                                {{ bill.get_payment_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'portal_bill_detail' bill.pk %}" style="color:var(--primary); margin-right:10px;">View</a>
+                            {% if bill.payment_status != 'paid' %}
+                            <a href="{% url 'portal_payment_bill' bill.pk %}" style="color:var(--primary);">Pay</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:var(--muted); padding:20px;">No bills found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if bills|length > 5 %}
+            <div style="margin-top:15px; text-align:center;">
+                <a href="{% url 'portal_bills' %}" style="color:var(--primary);">View All Bills</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

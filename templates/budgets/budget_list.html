@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Budgets - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        Budget Allocation
+        <a href="{% url 'budget_create' %}" class="btn-primary">+ Create Budget</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Analytical Account</th>
+                    <th>Period</th>
+                    <th>Budgeted Amount</th>
+                    <th>Actual Amount</th>
+                    <th>Achievement %</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for budget in budgets %}
+                <tr>
+                    <td>{{ budget.name }}</td>
+                    <td>{{ budget.analytical_account }}</td>
+                    <td>{{ budget.start_date }} to {{ budget.end_date }}</td>
+                    <td>${{ budget.budgeted_amount|floatformat:2 }}</td>
+                    <td>${{ budget.actual_amount|floatformat:2 }}</td>
+                    <td>
+                        <span style="color:{% if budget.achievement_percentage > 100 %}var(--danger){% elif budget.achievement_percentage > 80 %}var(--warning){% else %}var(--success){% endif %}; font-weight:bold;">
+                            {{ budget.achievement_percentage|floatformat:1 }}%
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'budget_detail' budget.pk %}" style="color:var(--primary); margin-right:10px;">View</a>
+                        {% if user.role == 'admin' %}
+                        <a href="{% url 'budget_edit' budget.pk %}" style="color:var(--primary);">Edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center; color:var(--muted); padding:40px;">
+                        No budgets found. <a href="{% url 'budget_create' %}" style="color:var(--primary);">Create your first budget</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

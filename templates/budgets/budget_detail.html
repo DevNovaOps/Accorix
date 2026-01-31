@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Detail - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        {{ budget.name }}
+        {% if user.role == 'admin' %}
+        <a href="{% url 'budget_edit' budget.pk %}" class="btn-primary">Edit Budget</a>
+        {% endif %}
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;">
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Budget Information</h3>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Analytical Account</div>
+                    <div style="font-weight:600; font-size:1.1rem;">{{ budget.analytical_account }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Period</div>
+                    <div style="font-weight:600;">{{ budget.start_date }} to {{ budget.end_date }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Budgeted Amount</div>
+                    <div style="font-size:1.5rem; font-weight:700;">${{ budget.budgeted_amount|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Performance</h3>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Actual Amount</div>
+                    <div style="font-size:1.5rem; font-weight:700;">${{ budget.actual_amount|floatformat:2 }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Variance</div>
+                    <div style="font-size:1.5rem; font-weight:700; color:{% if budget.variance >= 0 %}var(--danger){% else %}var(--success){% endif %};">
+                        ${{ budget.variance|floatformat:2 }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Achievement</div>
+                    <div style="font-size:1.5rem; font-weight:700;">{{ budget.achievement_percentage|floatformat:1 }}%</div>
+                    <div style="width:100%; height:12px; background:var(--border); border-radius:6px; overflow:hidden; margin-top:8px;">
+                        <div style="height:100%; width:{% if budget.achievement_percentage > 100 %}100{% else %}{{ budget.achievement_percentage }}{% endif %}%; background:{% if budget.achievement_percentage > 100 %}var(--danger){% else %}var(--primary){% endif %};"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Remaining Balance</div>
+                    <div style="font-size:1.5rem; font-weight:700; color:{% if budget.remaining_balance < 0 %}var(--danger){% else %}var(--success){% endif %};">
+                        ${{ budget.remaining_balance|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if revisions %}
+    <div class="card">
+        <h3 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--text);">Budget Revisions</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            {% for revision in revisions %}
+            <div style="padding:15px; background:var(--input-bg); border-radius:8px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+                    <div style="font-weight:600;">
+                        ${{ revision.previous_amount|floatformat:2 }} → ${{ revision.new_amount|floatformat:2 }}
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--muted);">{{ revision.revised_at|date:"M d, Y H:i" }}</div>
+                </div>
+                <div style="font-size:0.9rem; color:var(--muted);">{{ revision.reason }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">{{ title }}</div>
+
+    <div class="card">
+        <form method="post" id="poForm">
+            {% csrf_token %}
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+                <div class="form-group">
+                    <label>Date *</label>
+                    {{ form.date }}
+                </div>
+                <div class="form-group">
+                    <label>Contact *</label>
+                    {{ form.contact }}
+                </div>
+                <div class="form-group">
+                    <label>Analytical Account</label>
+                    {{ form.analytical_account }}
+                </div>
+                <div class="form-group">
+                    <label>Expected Delivery Date</label>
+                    {{ form.expected_delivery_date }}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:20px;">
+                <label>Notes</label>
+                {{ form.notes }}
+            </div>
+
+            <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:15px; color:var(--text);">Items</h3>
+            <div id="itemsContainer" style="margin-bottom:20px;">
+                <div class="item-row card" style="margin-bottom:15px;">
+                    <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:15px; align-items:end;">
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select name="product" class="form-control product-select">
+                                <option value="">Select Product</option>
+                                {% for product in products %}
+                                <option value="{{ product.pk }}" data-price="{{ product.unit_price }}">{{ product.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" name="quantity" step="0.01" min="0.01" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit Price</label>
+                            <input type="number" name="unit_price" step="0.01" min="0" class="form-control unit-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Total</label>
+                            <input type="text" class="form-control line-total" readonly style="background:var(--input-bg);">
+                        </div>
+                        <div>
+                            <button type="button" class="remove-item btn-secondary" style="width:100%;">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="addItem" class="btn-secondary" style="margin-bottom:20px;">+ Add Item</button>
+
+            <div style="display:flex; gap:15px;">
+                <button type="submit" class="btn-primary">Save Purchase Order</button>
+                <a href="{% url 'purchase_order_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsContainer = document.getElementById('itemsContainer');
+    const addItemBtn = document.getElementById('addItem');
+    
+    function calculateLineTotal(row) {
+        const quantity = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
+        const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+        const total = quantity * price;
+        row.querySelector('.line-total').value = total.toFixed(2);
+    }
+    
+    function addItemRow() {
+        const firstRow = itemsContainer.querySelector('.item-row');
+        const newRow = firstRow.cloneNode(true);
+        newRow.querySelector('input[name="quantity"]').value = '';
+        newRow.querySelector('.unit-price').value = '';
+        newRow.querySelector('.line-total').value = '';
+        newRow.querySelector('.product-select').value = '';
+        itemsContainer.appendChild(newRow);
+    }
+    
+    itemsContainer.addEventListener('change', function(e) {
+        if (e.target.classList.contains('product-select')) {
+            const price = e.target.options[e.target.selectedIndex].dataset.price;
+            const row = e.target.closest('.item-row');
+            row.querySelector('.unit-price').value = price || '';
+            calculateLineTotal(row);
+        }
+    });
+    
+    itemsContainer.addEventListener('input', function(e) {
+        if (e.target.name === 'quantity' || e.target.classList.contains('unit-price')) {
+            calculateLineTotal(e.target.closest('.item-row'));
+        }
+    });
+    
+    itemsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item')) {
+            if (itemsContainer.querySelectorAll('.item-row').length > 1) {
+                e.target.closest('.item-row').remove();
+            }
+        }
+    });
+    
+    addItemBtn.addEventListener('click', addItemRow);
+});
+</script>
+{% endblock %}

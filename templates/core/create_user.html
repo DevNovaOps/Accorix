@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Create User - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">Create User</div>
+
+    <div class="card">
+        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+            {% csrf_token %}
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Login ID * (6-12 characters, unique)</label>
+                {{ form.login_id }}
+                {% if form.login_id.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.login_id.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Email ID *</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Role *</label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.role.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Password *</label>
+                    {{ form.password }}
+                    <div style="font-size:0.75rem; color:var(--muted); margin-top:5px;">
+                        Must be 8+ chars with uppercase, lowercase, and special character
+                    </div>
+                    {% if form.password.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Re-Enter Password *</label>
+                    {{ form.re_enter_password }}
+                    {% if form.re_enter_password.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.re_enter_password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div style="color:var(--danger); padding:10px; background:rgba(239,68,68,0.1); border-radius:8px;">
+                {{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+
+            <div style="display:flex; gap:15px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Create User</button>
+                <a href="{% url 'user_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
