@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'portal_base.html' %}
 
 {% block title %}My Orders - ERP Budget{% endblock %}
 
@@ -22,7 +22,7 @@
                     <tr>
                         <td>{{ po.transaction_number }}</td>
                         <td>{{ po.date }}</td>
-                        <td>${{ po.total_amount|floatformat:2 }}</td>
+                        <td>₹{{ po.total_amount|floatformat:2 }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -48,7 +48,7 @@
                     <tr>
                         <td>{{ so.transaction_number }}</td>
                         <td>{{ so.date }}</td>
-                        <td>${{ so.total_amount|floatformat:2 }}</td>
+                        <td>₹{{ so.total_amount|floatformat:2 }}</td>
                     </tr>
                     {% empty %}
                     <tr>

@@ -26,7 +26,7 @@
                     <td>{{ order.transaction_number }}</td>
                     <td>{{ order.date }}</td>
                     <td>{{ order.contact.name }}</td>
-                    <td>${{ order.total_amount|floatformat:2 }}</td>
+                    <td>₹{{ order.total_amount|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if order.status == 'posted' %}status-paid{% elif order.status == 'draft' %}status-draft{% else %}status-not-paid{% endif %}">
                             {{ order.get_status_display }}

@@ -28,8 +28,8 @@
                     <td>{{ budget.name }}</td>
                     <td>{{ budget.analytical_account }}</td>
                     <td>{{ budget.start_date }} to {{ budget.end_date }}</td>
-                    <td>${{ budget.budgeted_amount|floatformat:2 }}</td>
-                    <td>${{ budget.actual_amount|floatformat:2 }}</td>
+                    <td>₹{{ budget.budgeted_amount|floatformat:2 }}</td>
+                    <td>₹{{ budget.actual_amount|floatformat:2 }}</td>
                     <td>
                         <span style="color:{% if budget.achievement_percentage > 100 %}var(--danger){% elif budget.achievement_percentage > 80 %}var(--warning){% else %}var(--success){% endif %}; font-weight:bold;">
                             {{ budget.achievement_percentage|floatformat:1 }}%

@@ -1,0 +1,127 @@
+{% extends 'portal_base.html' %}
+
+{% block title %}Payment Successful - ACCORIX Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.success-container {
+    max-width: 500px;
+    margin: 50px auto;
+    text-align: center;
+    padding: 20px;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-details {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 25px;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.amount-highlight {
+    color: var(--success);
+    font-size: 1.2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="success-container">
+        <div class="success-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
+                <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
+            </svg>
+        </div>
+
+        <h1 style="color: var(--success); margin-bottom: 10px;">Payment Successful!</h1>
+        <p style="color: var(--muted); font-size: 1.1rem; margin-bottom: 30px;">
+            Your payment has been processed successfully.
+        </p>
+
+        <div class="success-details">
+            <div class="detail-row">
+                <span class="detail-label">Invoice Number</span>
+                <span class="detail-value">{{ invoice.transaction_number }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Payment Amount</span>
+                <span class="detail-value amount-highlight">₹{{ payment.amount|floatformat:2 }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Payment Method</span>
+                <span class="detail-value">Credit/Debit Card</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Transaction ID</span>
+                <span class="detail-value">{{ payment.stripe_payment_intent_id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Payment Date</span>
+                <span class="detail-value">{{ payment.paid_at|date:"M d, Y H:i" }}</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+            <a href="{% url 'portal_invoice_detail' invoice.pk %}" class="btn-primary">View Invoice</a>
+            <a href="{% url 'portal_dashboard' %}" class="btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: var(--info-bg); border-radius: 8px; color: var(--info-text);">
+            <h4 style="margin-top: 0;">What's Next?</h4>
+            <ul style="text-align: left; margin: 0; padding-left: 20px;">
+                <li>A payment confirmation email has been sent to your registered email address</li>
+                <li>Your invoice payment status has been updated</li>
+                <li>You can download the payment receipt from your invoice details</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

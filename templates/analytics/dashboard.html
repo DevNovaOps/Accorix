@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard - ACCORIX{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">Analytics Dashboard</div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value">₹{{ total_revenue|floatformat:2 }}</div>
+        </div>
+        <div class="kpi-card secondary">
+            <div class="kpi-label">Total Expenses</div>
+            <div class="kpi-value">₹{{ total_expenses|floatformat:2 }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Net Profit</div>
+            <div class="kpi-value" style="color:{% if net_profit >= 0 %}var(--success){% else %}var(--danger){% endif %};">
+                ₹{{ net_profit|floatformat:2 }}
+            </div>
+        </div>
+        <div class="kpi-card secondary">
+            <div class="kpi-label">Outstanding</div>
+            <div class="kpi-value">₹{{ outstanding_invoices|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:30px;">
+        <!-- Revenue vs Expenses Chart -->
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:20px; font-size:1.1rem; color:var(--text);">Revenue vs Expenses</h3>
+            <div style="text-align:center;">
+                <img src="data:image/png;base64,{{ revenue_chart }}" alt="Revenue vs Expenses Chart" style="max-width:100%; height:auto;">
+            </div>
+        </div>
+
+        <!-- Top Customers Chart -->
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:20px; font-size:1.1rem; color:var(--text);">Top Customers</h3>
+            <div style="text-align:center;">
+                <img src="data:image/png;base64,{{ top_customers_chart }}" alt="Top Customers Chart" style="max-width:100%; height:auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Width Charts -->
+    <div style="margin-top:30px;">
+        <!-- Monthly Trends Chart -->
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:20px; font-size:1.1rem; color:var(--text);">Monthly Financial Trends</h3>
+            <div style="text-align:center;">
+                <img src="data:image/png;base64,{{ monthly_trends_chart }}" alt="Monthly Trends Chart" style="max-width:100%; height:auto;">
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top:30px;">
+        <!-- Budget Variance Chart -->
+        <div class="card">
+            <h3 style="margin-top:0; margin-bottom:20px; font-size:1.1rem; color:var(--text);">Budget vs Actual</h3>
+            <div style="text-align:center;">
+                <img src="data:image/png;base64,{{ budget_variance_chart }}" alt="Budget Variance Chart" style="max-width:100%; height:auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="margin-top:30px; display:flex; gap:15px;">
+        <a href="{% url 'generate_report' %}" class="btn-primary">Generate Custom Report</a>
+        <a href="{% url 'pdf_upload' %}" class="btn-secondary">Upload PDF Document</a>
+        <a href="{% url 'pdf_list' %}" class="btn-secondary">View Documents</a>
+    </div>
+</div>
+{% endblock %}

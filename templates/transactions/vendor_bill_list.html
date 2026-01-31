@@ -28,7 +28,7 @@
                     <td>{{ bill.transaction_number }}</td>
                     <td>{{ bill.date }}</td>
                     <td>{{ bill.contact.name }}</td>
-                    <td>${{ bill.total_amount|floatformat:2 }}</td>
+                    <td>₹{{ bill.total_amount|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if bill.status == 'posted' %}status-paid{% elif bill.status == 'draft' %}status-draft{% else %}status-not-paid{% endif %}">
                             {{ bill.get_status_display }}

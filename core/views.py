@@ -87,9 +87,13 @@ def create_user_view(request):
 
 @login_required
 def dashboard_view(request):
+    # Redirect portal users to their dashboard
+    if request.user.is_portal_user:
+        return redirect('portal_dashboard')
+    
     context = {}
     
-    if request.user.role == 'admin':
+    if request.user.is_admin or request.user.role == 'invoicing':
         from transactions.models import CustomerInvoice, VendorBill, PurchaseOrder, SalesOrder, Payment
         from budgets.models import Budget
         
@@ -107,21 +111,6 @@ def dashboard_view(request):
             'total_actual': total_actual,
             'recent_invoices': CustomerInvoice.objects.all().order_by('-date')[:10],
         })
-    elif request.user.role == 'portal':
-        # Portal user sees their own invoices/bills
-        from transactions.models import CustomerInvoice, VendorBill, PurchaseOrder, SalesOrder
-        from core.models import Contact
-        
-        try:
-            contact = Contact.objects.get(email=request.user.email)
-            context.update({
-                'invoices': CustomerInvoice.objects.filter(contact=contact, status='posted').order_by('-date'),
-                'bills': VendorBill.objects.filter(contact=contact, status='posted').order_by('-date'),
-                'orders': list(PurchaseOrder.objects.filter(contact=contact)[:3]) + 
-                         list(SalesOrder.objects.filter(contact=contact)[:3]),
-            })
-        except Contact.DoesNotExist:
-            pass
     
     return render(request, 'core/dashboard.html', context)
 
@@ -151,12 +140,58 @@ def contact_create_view(request):
             contact = form.save(commit=False)
             contact.created_by = request.user
             contact.save()
-            messages.success(request, 'Contact created successfully!')
             
-            # Send email invitation if contact has email
-            if contact.email:
-                # TODO: Implement email sending
-                pass
+            # Automatically create portal user for customer/vendor contacts
+            if contact.email and contact.contact_type in ['customer', 'vendor']:
+                try:
+                    # Check if user already exists
+                    existing_user = User.objects.filter(email=contact.email).first()
+                    if not existing_user:
+                        # Create username from email
+                        username = contact.email.split('@')[0]
+                        login_id = username
+                        
+                        # Ensure unique login_id
+                        counter = 1
+                        while User.objects.filter(login_id=login_id).exists():
+                            login_id = f"{username}{counter}"
+                            counter += 1
+                        
+                        # Create the user
+                        user = User.objects.create(
+                            username=login_id,
+                            login_id=login_id,
+                            email=contact.email,
+                            first_name=contact.name.split()[0] if contact.name else '',
+                            last_name=' '.join(contact.name.split()[1:]) if len(contact.name.split()) > 1 else '',
+                            role=contact.contact_type,
+                            contact=contact,
+                        )
+                        
+                        # Set a temporary password
+                        temp_password = f"temp{contact.id}123"
+                        user.set_password(temp_password)
+                        user.save()
+                        
+                        messages.success(request, f'Contact and portal user created successfully! Login credentials - ID: {login_id}, Password: {temp_password}')
+                        
+                        # TODO: Send email invitation with login credentials
+                        # send_portal_invitation_email(contact, login_id, temp_password)
+                        
+                    else:
+                        # Link existing user to contact if not already linked
+                        if not existing_user.contact:
+                            existing_user.contact = contact
+                            existing_user.role = contact.contact_type
+                            existing_user.save()
+                            messages.success(request, 'Contact created and linked to existing user!')
+                        else:
+                            messages.success(request, 'Contact created successfully!')
+                            
+                except Exception as e:
+                    messages.warning(request, f'Contact created but failed to create portal user: {str(e)}')
+            else:
+                messages.success(request, 'Contact created successfully!')
             
             return redirect('contact_list')
     else:

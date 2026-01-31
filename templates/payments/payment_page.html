@@ -1,0 +1,277 @@
+{% extends 'portal_base.html' %}
+
+{% block title %}Pay Invoice - ACCORIX Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.payment-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.payment-summary {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.payment-form {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 30px;
+}
+
+#card-element {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 10px 0;
+}
+
+#card-errors {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+
+.payment-button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.payment-button:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+}
+
+.secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--success);
+    font-size: 0.85rem;
+    margin-top: 15px;
+}
+
+.loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="payment-container">
+        <div class="page-title" style="text-align: center; margin-bottom: 30px;">
+            Pay Invoice
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="payment-summary">
+            <h3 style="margin-top: 0; color: var(--text);">Invoice Details</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Invoice Number</div>
+                    <div style="font-weight: 600;">{{ invoice.transaction_number }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Due Date</div>
+                    <div style="font-weight: 600;">{{ invoice.due_date }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Total Amount</div>
+                    <div style="font-weight: 600;">₹{{ invoice.total_amount|floatformat:2 }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Amount to Pay</div>
+                    <div style="font-weight: 600; color: var(--primary); font-size: 1.2rem;">₹{{ amount|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Form -->
+        <div class="payment-form">
+            <h3 style="margin-top: 0; color: var(--text);">Payment Information</h3>
+            
+            <form id="payment-form">
+                <div style="margin-bottom: 20px;">
+                    <label for="card-element" style="display: block; margin-bottom: 8px; font-weight: 600;">
+                        Card Details
+                    </label>
+                    <div id="card-element">
+                        <!-- Stripe Elements will create form elements here -->
+                    </div>
+                    <div id="card-errors" role="alert"></div>
+                </div>
+
+                <button id="submit-button" class="payment-button" type="submit">
+                    <span id="button-text">Pay ₹{{ amount|floatformat:2 }}</span>
+                    <div class="loading-spinner" id="spinner"></div>
+                </button>
+
+                <div class="secure-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11H16V16H8V11H9.2V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.4,8.7 10.4,10V11H13.6V10C13.6,8.7 12.8,8.2 12,8.2Z"/>
+                    </svg>
+                    Secured by Stripe • Your payment information is encrypted
+                </div>
+            </form>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'portal_invoice_detail' invoice.pk %}" style="color: var(--muted);">← Back to Invoice</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+// Initialize Stripe
+const stripe = Stripe('{{ stripe_publishable_key }}');
+const elements = stripe.elements({
+    appearance: {
+        theme: 'night',
+        variables: {
+            colorPrimary: '#6366f1',
+            colorBackground: '#1a1a1a',
+            colorText: '#ffffff',
+            colorDanger: '#df1b41',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            spacingUnit: '4px',
+            borderRadius: '4px',
+        }
+    }
+});
+
+// Create card element
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+// Handle form submission
+const form = document.getElementById('payment-form');
+const submitButton = document.getElementById('submit-button');
+const buttonText = document.getElementById('button-text');
+const spinner = document.getElementById('spinner');
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    setLoading(true);
+    
+    try {
+        // Create payment intent
+        const response = await fetch('/payments/create-payment-intent/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                invoice_id: {{ invoice.pk }},
+                amount: {{ amount }}
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            showError(data.error);
+            setLoading(false);
+            return;
+        }
+        
+        // Confirm payment
+        const {error} = await stripe.confirmCardPayment(data.client_secret, {
+            payment_method: {
+                card: cardElement,
+                billing_details: {
+                    name: '{{ user.get_full_name|default:user.username }}',
+                    email: '{{ user.email }}',
+                }
+            }
+        });
+        
+        if (error) {
+            showError(error.message);
+            setLoading(false);
+        } else {
+            // Payment succeeded
+            window.location.href = `/payments/success/${data.payment_id}/`;
+        }
+        
+    } catch (error) {
+        showError('An unexpected error occurred.');
+        setLoading(false);
+    }
+});
+
+function setLoading(isLoading) {
+    if (isLoading) {
+        submitButton.disabled = true;
+        buttonText.style.display = 'none';
+        spinner.style.display = 'inline-block';
+    } else {
+        submitButton.disabled = false;
+        buttonText.style.display = 'inline';
+        spinner.style.display = 'none';
+    }
+}
+
+function showError(message) {
+    const errorElement = document.getElementById('card-errors');
+    errorElement.textContent = message;
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Handle card element changes
+cardElement.on('change', ({error}) => {
+    const displayError = document.getElementById('card-errors');
+    if (error) {
+        displayError.textContent = error.message;
+    } else {
+        displayError.textContent = '';
+    }
+});
+</script>
+{% endblock %}

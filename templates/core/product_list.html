@@ -27,7 +27,7 @@
                     <td>{{ product.name }}</td>
                     <td>{{ product.sku }}</td>
                     <td>{{ product.category|default:"-" }}</td>
-                    <td>${{ product.unit_price|floatformat:2 }}</td>
+                    <td>₹{{ product.unit_price|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if product.is_active %}status-paid{% else %}status-not-paid{% endif %}">
                             {% if product.is_active %}Active{% else %}Archived{% endif %}

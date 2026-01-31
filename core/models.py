@@ -6,8 +6,9 @@ import re
 
 class User(AbstractUser):
     ROLE_CHOICES = [
-        ('admin', 'Admin'),
-        ('portal', 'Portal User'),
+        ('admin', 'Admin (Business Owner)'),
+        ('customer', 'Customer'),
+        ('vendor', 'Vendor'),
         ('invoicing', 'Invoicing User'),
     ]
     
@@ -20,8 +21,19 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='invoicing')
     email = models.EmailField(unique=True)
     
+    # Link to contact for portal users
+    contact = models.OneToOneField('Contact', on_delete=models.CASCADE, null=True, blank=True, related_name='user_account')
+    
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f"{self.username} ({self.get_role_display()})"
+    
+    @property
+    def is_portal_user(self):
+        return self.role in ['customer', 'vendor']
+    
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
 
 
 class Contact(models.Model):

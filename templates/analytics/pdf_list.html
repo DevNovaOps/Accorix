@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}PDF Documents - ACCORIX{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">
+        PDF Documents
+        <a href="{% url 'pdf_upload' %}" class="btn-primary">Upload New Document</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Extracted Amount</th>
+                    <th>Extracted Date</th>
+                    <th>Uploaded By</th>
+                    <th>Upload Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                <tr>
+                    <td>{{ document.title }}</td>
+                    <td>
+                        <span class="status-badge status-{{ document.document_type }}">
+                            {{ document.get_document_type_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if document.extracted_amount %}
+                            ₹{{ document.extracted_amount|floatformat:2 }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ document.extracted_date|default:"-" }}</td>
+                    <td>{{ document.uploaded_by.get_full_name|default:document.uploaded_by.username }}</td>
+                    <td>{{ document.uploaded_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <span class="status-badge {% if document.processed %}status-paid{% else %}status-draft{% endif %}">
+                            {% if document.processed %}Processed{% else %}Processing{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'pdf_detail' document.pk %}" style="color:var(--primary); margin-right:10px;">View</a>
+                        <a href="{{ document.pdf_file.url }}" target="_blank" style="color:var(--primary);">Download</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center; color:var(--muted); padding:40px;">
+                        No documents uploaded yet.
+                        <br><br>
+                        <a href="{% url 'pdf_upload' %}" class="btn-primary">Upload Your First Document</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'portal_base.html' %}
 
 {% block title %}My Bills - ERP Budget{% endblock %}
 
@@ -24,7 +24,7 @@
                     <td>{{ bill.transaction_number }}</td>
                     <td>{{ bill.date }}</td>
                     <td>{{ bill.due_date }}</td>
-                    <td>${{ bill.total_amount|floatformat:2 }}</td>
+                    <td>₹{{ bill.total_amount|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if bill.payment_status == 'paid' %}status-paid{% elif bill.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
                             {{ bill.get_payment_status_display }}

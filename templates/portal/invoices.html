@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'portal_base.html' %}
 
 {% block title %}My Invoices - ERP Budget{% endblock %}
 
@@ -24,7 +24,7 @@
                     <td>{{ invoice.transaction_number }}</td>
                     <td>{{ invoice.date }}</td>
                     <td>{{ invoice.due_date }}</td>
-                    <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                    <td>₹{{ invoice.total_amount|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
                             {{ invoice.get_payment_status_display }}

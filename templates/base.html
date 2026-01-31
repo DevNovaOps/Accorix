@@ -31,7 +31,7 @@
         </div>
 
         <!-- ACCOUNT -->
-        {% if user.role == 'admin' or user.role == 'invoicing' %}
+        {% if user.role == 'admin'%}
         <div class="menu-item">
             Account
             <div class="dropdown-panel">
@@ -65,7 +65,11 @@
         
         <!-- REPORTS -->
         <div class="menu-item">
-            <a href="{% url 'budget_dashboard' %}" style="text-decoration:none; color:inherit;">Reports</a>
+            Reports
+            <div class="dropdown-panel">
+                <a href="{% url 'budget_dashboard' %}">Budget Dashboard</a>
+                <a href="{% url 'analytics_dashboard' %}">Analytics Dashboard</a>
+            </div>
         </div>
         {% endif %}
         

@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Budgeted Amount</div>
-                    <div style="font-size:1.5rem; font-weight:700;">${{ budget.budgeted_amount|floatformat:2 }}</div>
+                    <div style="font-size:1.5rem; font-weight:700;">₹{{ budget.budgeted_amount|floatformat:2 }}</div>
                 </div>
             </div>
         </div>
@@ -35,12 +35,12 @@
             <div style="display:flex; flex-direction:column; gap:15px;">
                 <div>
                     <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Actual Amount</div>
-                    <div style="font-size:1.5rem; font-weight:700;">${{ budget.actual_amount|floatformat:2 }}</div>
+                    <div style="font-size:1.5rem; font-weight:700;">₹{{ budget.actual_amount|floatformat:2 }}</div>
                 </div>
                 <div>
                     <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Variance</div>
                     <div style="font-size:1.5rem; font-weight:700; color:{% if budget.variance >= 0 %}var(--danger){% else %}var(--success){% endif %};">
-                        ${{ budget.variance|floatformat:2 }}
+                        ₹{{ budget.variance|floatformat:2 }}
                     </div>
                 </div>
                 <div>
@@ -53,7 +53,7 @@
                 <div>
                     <div style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Remaining Balance</div>
                     <div style="font-size:1.5rem; font-weight:700; color:{% if budget.remaining_balance < 0 %}var(--danger){% else %}var(--success){% endif %};">
-                        ${{ budget.remaining_balance|floatformat:2 }}
+                        ₹{{ budget.remaining_balance|floatformat:2 }}
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
             <div style="padding:15px; background:var(--input-bg); border-radius:8px; border:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
                     <div style="font-weight:600;">
-                        ${{ revision.previous_amount|floatformat:2 }} → ${{ revision.new_amount|floatformat:2 }}
+                        ₹{{ revision.previous_amount|floatformat:2 }} → ₹{{ revision.new_amount|floatformat:2 }}
                     </div>
                     <div style="font-size:0.75rem; color:var(--muted);">{{ revision.revised_at|date:"M d, Y H:i" }}</div>
                 </div>

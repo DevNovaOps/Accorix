@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'transactions',
     'budgets',
     'portal',
+    'analytics',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -141,3 +143,16 @@ AUTH_USER_MODEL = 'core.User'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Stripe Configuration
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51Svi5JJx4g6pSaOifqlVPlWu1Y0GH5teTobpRYge5ixZuebFjttACSCJAvfNObdknM0gS13P6HGUDDh88cEVve7D000weLeojV'
+STRIPE_SECRET_KEY = 'pk_test_51Svi5JJx4g6pSaOifqlVPlWu1Y0GH5teTobpRYge5ixZuebFjttACSCJAvfNObdknM0gS13P6HGUDDh88cEVve7D000weLeojV'
+STRIPE_WEBHOOK_SECRET = 'whsec_your_webhook_secret_here'
+
+# File Upload Settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Media files for PDF uploads
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'

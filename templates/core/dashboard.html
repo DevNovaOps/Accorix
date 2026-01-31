@@ -12,11 +12,11 @@
     <div class="kpi-grid">
         <div class="kpi-card">
             <div class="kpi-label">Total Budget</div>
-            <div class="kpi-value">${{ total_budgeted|default:"0"|floatformat:2 }}</div>
+            <div class="kpi-value">₹{{ total_budgeted|default:"0"|floatformat:2 }}</div>
         </div>
         <div class="kpi-card secondary">
             <div class="kpi-label">Actual Expense</div>
-            <div class="kpi-value">${{ total_actual|default:"0"|floatformat:2 }}</div>
+            <div class="kpi-value">₹{{ total_actual|default:"0"|floatformat:2 }}</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Total Invoices</div>
@@ -45,7 +45,7 @@
                 <tr>
                     <td>{{ invoice.transaction_number }}</td>
                     <td>{{ invoice.contact.name }}</td>
-                    <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                    <td>₹{{ invoice.total_amount|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
                             {{ invoice.get_payment_status_display }}
@@ -75,7 +75,7 @@
                 <tr>
                     <td>{{ invoice.transaction_number }}</td>
                     <td>{{ invoice.date }}</td>
-                    <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                    <td>₹{{ invoice.total_amount|floatformat:2 }}</td>
                     <td>
                         <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
                             {{ invoice.get_payment_status_display }}

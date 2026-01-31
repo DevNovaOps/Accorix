@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Webhook Status - ACCORIX{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">Stripe Webhook Status</div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color:var(--text);">Webhook Configuration</h3>
+        
+        <div style="background: var(--info-bg); padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: var(--info-text);">Correct Webhook URL</h4>
+            <code style="background: var(--card-bg); padding: 8px; border-radius: 4px; display: block; margin: 10px 0;">
+                {{ request.build_absolute_uri }}/payments/webhook/
+            </code>
+            <p style="margin: 0; color: var(--info-text); font-size: 0.9rem;">
+                Use this URL in your Stripe Dashboard → Webhooks section
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+            <div>
+                <h4>Required Events to Listen For:</h4>
+                <ul style="color: var(--muted);">
+                    <li><code>payment_intent.succeeded</code></li>
+                    <li><code>payment_intent.payment_failed</code></li>
+                    <li><code>charge.succeeded</code></li>
+                </ul>
+            </div>
+            <div>
+                <h4>HTTP Methods:</h4>
+                <ul style="color: var(--muted);">
+                    <li>✅ POST - Webhook events</li>
+                    <li>❌ GET - Not allowed (405 error)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="background: var(--warning-bg); padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: var(--warning-text);">Common Issues</h4>
+            <ul style="color: var(--warning-text); margin: 0;">
+                <li><strong>404 Error on /webhook:</strong> Update URL to /payments/webhook/</li>
+                <li><strong>405 Error (Method Not Allowed):</strong> Webhooks must use POST method</li>
+                <li><strong>400 Error (Bad Request):</strong> Check webhook signature and payload</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color:var(--text);">Test Webhook Connectivity</h3>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="testWebhook()" class="btn-primary" id="testBtn">Test Webhook Endpoint</button>
+            <div id="testResult" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    {% if user.is_superuser %}
+    <div class="card">
+        <h3 style="margin-top:0; color:var(--text);">Recent Webhook Events</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Event ID</th>
+                    <th>Event Type</th>
+                    <th>Processed</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for webhook in recent_webhooks %}
+                <tr>
+                    <td><code>{{ webhook.stripe_event_id }}</code></td>
+                    <td>{{ webhook.event_type }}</td>
+                    <td>
+                        <span class="status-badge {% if webhook.processed %}status-paid{% else %}status-draft{% endif %}">
+                            {% if webhook.processed %}✅ Processed{% else %}⏳ Pending{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ webhook.created_at|date:"M d, Y H:i:s" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; color:var(--muted); padding:20px;">
+                        No webhook events received yet
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+async function testWebhook() {
+    const btn = document.getElementById('testBtn');
+    const result = document.getElementById('testResult');
+    
+    btn.disabled = true;
+    btn.textContent = 'Testing...';
+    result.innerHTML = '';
+    
+    try {
+        const response = await fetch('/payments/webhook/test/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({test: true})
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            result.innerHTML = `
+                <div style="background: var(--success-bg); color: var(--success-text); padding: 10px; border-radius: 4px;">
+                    ✅ Webhook endpoint is working correctly!<br>
+                    Status: ${data.status}
+                </div>
+            `;
+        } else {
+            result.innerHTML = `
+                <div style="background: var(--danger-bg); color: var(--danger-text); padding: 10px; border-radius: 4px;">
+                    ❌ Webhook test failed: ${data.error || 'Unknown error'}
+                </div>
+            `;
+        }
+    } catch (error) {
+        result.innerHTML = `
+            <div style="background: var(--danger-bg); color: var(--danger-text); padding: 10px; border-radius: 4px;">
+                ❌ Network error: ${error.message}
+            </div>
+        `;
+    }
+    
+    btn.disabled = false;
+    btn.textContent = 'Test Webhook Endpoint';
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

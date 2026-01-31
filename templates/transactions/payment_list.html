@@ -25,7 +25,7 @@
                 <tr>
                     <td>{{ payment.payment_number }}</td>
                     <td>{{ payment.date }}</td>
-                    <td>${{ payment.amount|floatformat:2 }}</td>
+                    <td>₹{{ payment.amount|floatformat:2 }}</td>
                     <td>{{ payment.get_payment_method_display }}</td>
                     <td>
                         {% if payment.customer_invoice %}

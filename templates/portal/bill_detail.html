@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'portal_base.html' %}
 
 {% block title %}Bill Detail - ERP Budget{% endblock %}
 
@@ -62,15 +62,15 @@
                 <tr>
                     <td>{{ item.product.name }}</td>
                     <td style="text-align:right;">{{ item.quantity }}</td>
-                    <td style="text-align:right;">${{ item.unit_price|floatformat:2 }}</td>
-                    <td style="text-align:right;">${{ item.line_total|floatformat:2 }}</td>
+                    <td style="text-align:right;">₹{{ item.unit_price|floatformat:2 }}</td>
+                    <td style="text-align:right;">₹{{ item.line_total|floatformat:2 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr style="font-weight:700; font-size:1.1rem;">
                     <td colspan="3" style="text-align:right; padding-top:15px;">Total:</td>
-                    <td style="text-align:right; padding-top:15px;">${{ bill.total_amount|floatformat:2 }}</td>
+                    <td style="text-align:right; padding-top:15px;">₹{{ bill.total_amount|floatformat:2 }}</td>
                 </tr>
             </tfoot>
         </table>
