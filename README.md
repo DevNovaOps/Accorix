@@ -1,168 +1,308 @@
-# ACCORIX Finance OS
+# ACCORIX - Complete Accounting & ERP System
 
-A comprehensive ERP financial management system built with Django, MySQL, HTML, CSS, and JavaScript.
+A comprehensive Django-based accounting and ERP system with advanced features including budget management, analytics, payment processing, and portal access for customers and vendors.
 
-## Features
+## 🌟 Features
 
-### User Management
-- **Login/Signup**: Secure authentication with validation
-- **Role-based Access**: Admin, Portal User, and Invoicing User roles
-- **User Creation**: Admin can create users with different roles
+### Core Accounting
+- **Chart of Accounts** - Complete accounting structure with assets, liabilities, equity, income, and expenses
+- **Customer & Vendor Management** - Comprehensive contact management with portal access
+- **Product Catalog** - Product management with pricing and categorization
+- **Invoice Management** - Customer invoices with payment tracking
+- **Bill Management** - Vendor bills with approval workflows
+- **Payment Processing** - Multiple payment methods including Stripe integration
 
-### Master Data Management
-- **Contacts**: Manage customers and vendors
-- **Products**: Product catalog with SKU, pricing, and categories
-- **Analytical Accounts**: Cost centers for budget tracking
-- **Auto Analytical Models**: Automated rules for linking transactions to cost centers
+### Advanced Features
+- **Budget Planning & Monitoring** - Create budgets with real-time variance analysis
+- **Analytical Accounts** - Cost center tracking and reporting
+- **Analytics Dashboard** - Interactive charts using matplotlib
+- **PDF Document Processing** - Upload and extract data from PDF documents
+- **Portal Access** - Customer and vendor self-service portals
+- **Multi-currency Support** - Indian Rupee (₹) with international support
 
-### Transaction Processing
-- **Purchase Orders**: Track purchase orders from vendors
-- **Vendor Bills**: Record and manage vendor bills
-- **Sales Orders**: Manage customer sales orders
-- **Customer Invoices**: Generate and track customer invoices
-- **Payments**: Record payments with automatic status updates
+### Technical Features
+- **Dark/Light Theme** - Modern responsive UI with theme switching
+- **Real-time Charts** - Revenue, expenses, budget variance, and trend analysis
+- **Stripe Integration** - Secure online payments with webhook support
+- **Role-based Access** - Admin, invoicing, customer, and vendor roles
+- **Mobile Responsive** - Works on all devices
 
-### Budget Monitoring
-- **Budget vs Actual**: Real-time comparison of budgeted vs actual spending
-- **Achievement Percentage**: Track budget utilization
-- **Remaining Balance**: Monitor remaining budget
-- **Budget Revisions**: Track changes to budgets over time
-- **Dashboard**: Visual dashboard with charts and reports
+## 🚀 Quick Start
 
-### Customer Portal
-- **Invoice/Bill Viewing**: Customers can view their invoices and bills
-- **Order Tracking**: View purchase orders and sales orders
-- **Document Download**: Download invoices and bills
-- **Online Payments**: Make payments directly from the portal
+### Prerequisites
+- Python 3.8+
+- MySQL 5.7+ or 8.0+
+- Node.js (for frontend dependencies, optional)
 
-## Technology Stack
-
-- **Backend**: Django 4.2.7
-- **Database**: MySQL
-- **Frontend**: HTML, CSS (Tailwind CSS), JavaScript
-- **Icons**: Phosphor Icons
-
-## Installation
+### Installation
 
 1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Acc
-   ```
+```bash
+git clone <repository-url>
+cd accorix
+```
 
-2. **Create a virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+2. **Create virtual environment**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
 3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-4. **Configure MySQL Database**
-   - Create a MySQL database named `accorix_db`
-   - Update database settings in `accorix/settings.py` or use environment variables
+4. **Database Setup**
+```bash
+# Create MySQL database
+mysql -u root -p
+CREATE DATABASE accorix_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+EXIT;
 
-5. **Set up environment variables** (optional)
-   Create a `.env` file:
-   ```
-   SECRET_KEY=your-secret-key-here
-   DEBUG=True
-   DB_NAME=accorix_db
-   DB_USER=root
-   DB_PASSWORD=your-password
-   DB_HOST=localhost
-   DB_PORT=3306
-   ```
+# Update database settings in accorix/settings.py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'accorix_db',
+        'USER': 'your_mysql_user',
+        'PASSWORD': 'your_mysql_password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+```
 
-6. **Run migrations**
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
+5. **Run migrations**
+```bash
+python manage.py migrate
+```
 
-7. **Create a superuser** (Admin user)
-   ```bash
-   python manage.py createsuperuser
-   ```
-   Note: You'll need to set the `login_id` field manually in the admin or use Django shell.
+6. **Setup complete system with sample data**
+```bash
+python setup_complete_system.py
+```
 
-8. **Run the development server**
-   ```bash
-   python manage.py runserver
-   ```
+7. **Start the development server**
+```bash
+python manage.py runserver
+```
 
-9. **Access the application**
-   - Open your browser and go to `http://localhost:8000`
-   - Login with your admin credentials
+8. **Access the application**
+- Admin Panel: http://localhost:8000/admin/
+- Main Application: http://localhost:8000/
+- Portal: http://localhost:8000/portal/
 
-## User Roles
+## 👥 Default Users
 
-### Admin
-- Full access to all features
-- Can create, edit, and archive master data
-- Can create users
-- Can view all reports and transactions
+### Admin User
+- **Username:** admin
+- **Password:** admin123
+- **Role:** System Administrator
+- **Access:** Full system access
 
 ### Invoicing User
-- Can create transactions (PO, SO, Invoices, Bills)
-- Can view master data
-- Cannot modify or archive master data
+- **Username:** invoicing
+- **Password:** invoice123
+- **Role:** Invoicing Manager
+- **Access:** Transaction management
 
-### Portal User
-- Can view their own invoices, bills, and orders
-- Can download documents
-- Can make online payments
-- Limited to their own data only
+### Portal Users
+- **Username:** portal_user_1, portal_user_2, portal_user_3
+- **Password:** portal123
+- **Role:** Customer/Vendor
+- **Access:** Portal dashboard, invoices, payments
 
-## Validation Rules
+## 🔧 Configuration
 
-### Login ID
-- Must be between 6-12 characters
-- Must be unique
+### Stripe Payment Setup
 
-### Email
-- Must be unique in the database
+1. **Get Stripe API Keys**
+   - Sign up at https://stripe.com
+   - Get your publishable and secret keys from the dashboard
 
-### Password
-- Minimum 8 characters
-- Must contain at least one lowercase letter
-- Must contain at least one uppercase letter
-- Must contain at least one special character
-
-## Key Concepts
-
-### Analytical Accounts (Cost Centers)
-Track *where* or on *what activity* money is being spent, as opposed to Chart of Accounts which tracks *what* the money is for.
-
-### Budget vs Actuals
-Compare planned financial targets (Budget) against real-world transactions (Actuals). Actuals are pulled from "Posted" journal entries.
-
-### Auto-Analytical Models
-Automated rules that link transactions to analytical accounts based on conditions like product category, product name, or contact type.
-
-### Payment Status
-- **Fully Paid**: Payment amount equals the Invoice/Bill total
-- **Partially Paid**: A payment was made, but a balance remains
-- **Not Paid**: No payments recorded
-
-## Development
-
-### Project Structure
-```
-Acc/
-├── accorix/          # Main Django project
-├── core/             # Core app (Users, Master Data)
-├── transactions/     # Transaction processing
-├── budgets/          # Budget management
-├── portal/           # Customer portal
-├── templates/        # HTML templates
-├── static/           # Static files
-└── manage.py
+2. **Update settings.py**
+```python
+STRIPE_PUBLISHABLE_KEY = 'pk_test_your_publishable_key_here'
+STRIPE_SECRET_KEY = 'sk_test_your_secret_key_here'
+STRIPE_WEBHOOK_SECRET = 'whsec_your_webhook_secret_here'
 ```
 
-## License
+3. **Setup Webhook Endpoint**
+   - In Stripe dashboard, add webhook endpoint: `https://yourdomain.com/payments/webhook/`
+   - Select events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.succeeded`
 
-This project is created for hackathon purposes.
+### Email Configuration (Optional)
+```python
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-app-password'
+```
+
+## 📊 System Architecture
+
+### Apps Structure
+```
+accorix/
+├── core/           # User management, contacts, products
+├── transactions/   # Invoices, bills, payments, orders
+├── budgets/        # Budget planning and monitoring
+├── analytics/      # Charts, reports, PDF processing
+├── payments/       # Stripe integration, payment processing
+└── portal/         # Customer/vendor self-service portal
+```
+
+### Key Models
+- **User** - Extended user model with roles
+- **Contact** - Customers and vendors
+- **Product** - Product catalog
+- **CustomerInvoice/VendorBill** - Transaction documents
+- **Budget** - Budget planning with analytical accounts
+- **AnalyticalAccount** - Cost centers
+- **ChartOfAccounts** - Accounting structure
+
+## 🎨 UI Features
+
+### Modern Design
+- Dark theme with cyan/magenta accents
+- Responsive grid layouts
+- Interactive charts and graphs
+- Mobile-first design
+
+### Dashboard Features
+- Real-time KPI cards
+- Revenue vs expenses charts
+- Monthly trend analysis
+- Budget variance tracking
+- Top customers analysis
+
+### Portal Features
+- Customer invoice viewing and payment
+- Vendor bill management
+- Order tracking
+- Payment history
+- Document downloads
+
+## 📈 Analytics & Reporting
+
+### Built-in Charts
+- **Revenue vs Expenses** - Monthly comparison
+- **Financial Trends** - Line charts with profit analysis
+- **Top Customers** - Pie chart of revenue distribution
+- **Budget Variance** - Actual vs budgeted spending
+
+### PDF Processing
+- Upload PDF documents
+- Automatic text extraction
+- Amount and date detection
+- Document categorization
+
+### Export Features
+- CSV data export
+- Custom report generation
+- Chart image downloads
+
+## 🔐 Security Features
+
+- CSRF protection on all forms
+- Role-based access control
+- Secure payment processing
+- File upload validation
+- SQL injection prevention
+- XSS protection
+
+## 🛠️ Development
+
+### Running Tests
+```bash
+python manage.py test
+```
+
+### Creating Migrations
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### Collecting Static Files
+```bash
+python manage.py collectstatic
+```
+
+### Creating Superuser
+```bash
+python manage.py createsuperuser
+```
+
+## 📱 API Endpoints
+
+### Analytics
+- `GET /analytics/` - Analytics dashboard
+- `POST /analytics/pdf/upload/` - Upload PDF documents
+- `GET /analytics/pdf/list/` - List documents
+
+### Payments
+- `POST /payments/create-payment-intent/` - Create Stripe payment
+- `POST /payments/webhook/` - Stripe webhook handler
+- `GET /payments/history/` - Payment history
+
+### Transactions
+- `GET /transactions/customer-invoices/` - Invoice list
+- `POST /transactions/customer-invoices/create/` - Create invoice
+- `GET /transactions/chart-of-accounts/` - Chart of accounts
+
+## 🚀 Production Deployment
+
+### Environment Variables
+```bash
+export DEBUG=False
+export SECRET_KEY='your-secret-key'
+export DATABASE_URL='mysql://user:pass@host:port/dbname'
+export STRIPE_SECRET_KEY='sk_live_your_live_key'
+```
+
+### Static Files
+```bash
+python manage.py collectstatic --noinput
+```
+
+### Database
+```bash
+python manage.py migrate --noinput
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Review the setup script for examples
+
+## 🔄 Updates
+
+### Version 1.0.0
+- Complete accounting system
+- Stripe payment integration
+- Analytics dashboard
+- Portal access
+- PDF processing
+- Budget management
+
+---
+
+**ACCORIX** - Your Complete Accounting & ERP Solution 🚀

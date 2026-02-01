@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ACCORIX{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <div>
+        <h1>{{ title }}</h1>
+        <p style="color: var(--muted); margin: 0;">Configure your chart of accounts structure</p>
+    </div>
+    <div>
+        <a href="{% url 'chart_of_accounts_list' %}" class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+            </svg>
+            Back to List
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.account_code.id_for_label }}">Account Code *</label>
+                {{ form.account_code }}
+                {% if form.account_code.errors %}
+                    <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                        {{ form.account_code.errors.0 }}
+                    </div>
+                {% endif %}
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+                    Unique identifier for this account (e.g., 1000, 2000, etc.)
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.account_name.id_for_label }}">Account Name *</label>
+                {{ form.account_name }}
+                {% if form.account_name.errors %}
+                    <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                        {{ form.account_name.errors.0 }}
+                    </div>
+                {% endif %}
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+                    Descriptive name for this account
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.account_type.id_for_label }}">Account Type *</label>
+                {{ form.account_type }}
+                {% if form.account_type.errors %}
+                    <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                        {{ form.account_type.errors.0 }}
+                    </div>
+                {% endif %}
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+                    Classification of this account
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.parent_account.id_for_label }}">Parent Account</label>
+                {{ form.parent_account }}
+                {% if form.parent_account.errors %}
+                    <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                        {{ form.parent_account.errors.0 }}
+                    </div>
+                {% endif %}
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+                    Optional parent account for hierarchical structure
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                        {{ form.status.errors.0 }}
+                    </div>
+                {% endif %}
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+                    Current status of this account
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                </svg>
+                Save Account
+            </button>
+            <a href="{% url 'chart_of_accounts_list' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Account Type Guide -->
+<div class="card" style="margin-top: 20px;">
+    <h3 style="margin-bottom: 16px; color: var(--text);">Account Type Guide</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 8px;">
+            <h4 style="color: var(--success); margin-bottom: 8px;">Assets</h4>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 8px;">
+                Resources owned by your business that have economic value.
+            </p>
+            <div style="font-size: 0.8rem; color: var(--muted);">
+                <strong>Examples:</strong> Cash, Bank Accounts, Accounts Receivable, Inventory, Equipment, Buildings
+            </div>
+        </div>
+        
+        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 8px;">
+            <h4 style="color: var(--danger); margin-bottom: 8px;">Liabilities</h4>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 8px;">
+                Debts and obligations your business owes to others.
+            </p>
+            <div style="font-size: 0.8rem; color: var(--muted);">
+                <strong>Examples:</strong> Accounts Payable, Loans, Credit Cards, Accrued Expenses, Taxes Payable
+            </div>
+        </div>
+        
+        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 8px;">
+            <h4 style="color: var(--warning); margin-bottom: 8px;">Equity</h4>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 8px;">
+                The owner's financial interest in the business.
+            </p>
+            <div style="font-size: 0.8rem; color: var(--muted);">
+                <strong>Examples:</strong> Owner's Capital, Retained Earnings, Common Stock, Additional Paid-in Capital
+            </div>
+        </div>
+        
+        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 8px;">
+            <h4 style="color: var(--primary); margin-bottom: 8px;">Income</h4>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 8px;">
+                Revenue earned from business operations and other sources.
+            </p>
+            <div style="font-size: 0.8rem; color: var(--muted);">
+                <strong>Examples:</strong> Sales Revenue, Service Income, Interest Income, Rental Income
+            </div>
+        </div>
+        
+        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 8px;">
+            <h4 style="color: var(--secondary); margin-bottom: 8px;">Expense</h4>
+            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 8px;">
+                Costs incurred in the process of earning revenue.
+            </p>
+            <div style="font-size: 0.8rem; color: var(--muted);">
+                <strong>Examples:</strong> Rent, Utilities, Salaries, Office Supplies, Marketing, Insurance
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-suggest account codes based on type
+document.getElementById('{{ form.account_type.id_for_label }}').addEventListener('change', function() {
+    const accountType = this.value;
+    const codeField = document.getElementById('{{ form.account_code.id_for_label }}');
+    
+    if (!codeField.value) {
+        let suggestedCode = '';
+        switch(accountType) {
+            case 'assets':
+                suggestedCode = '1000';
+                break;
+            case 'liabilities':
+                suggestedCode = '2000';
+                break;
+            case 'equity':
+                suggestedCode = '3000';
+                break;
+            case 'income':
+                suggestedCode = '4000';
+                break;
+            case 'expense':
+                suggestedCode = '5000';
+                break;
+        }
+        codeField.value = suggestedCode;
+    }
+});
+</script>
+{% endblock %}

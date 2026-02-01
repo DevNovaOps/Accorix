@@ -156,29 +156,98 @@ class CreateUserForm(forms.ModelForm):
 
 
 class ContactForm(forms.ModelForm):
+    tags_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter tags separated by commas'
+        }),
+        help_text="Enter tags separated by commas"
+    )
+    
     class Meta:
         model = Contact
-        fields = ['name', 'email', 'phone', 'address', 'contact_type']
+        fields = ['name', 'email', 'phone', 'address', 'contact_type', 'image']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'contact_type': forms.Select(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['tags_input'].initial = ', '.join(self.instance.tag_list)
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            # Check if email already exists (excluding current instance if editing)
+            existing = Contact.objects.filter(email=email)
+            if self.instance and self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            
+            if existing.exists():
+                raise forms.ValidationError('A contact with this email already exists.')
+        return email
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        tags_input = self.cleaned_data.get('tags_input', '')
+        if tags_input:
+            tag_list = [tag.strip() for tag in tags_input.split(',') if tag.strip()]
+            instance.set_tags(tag_list)
+        else:
+            instance.tags = ''
+        
+        if commit:
+            instance.save()
+        return instance
 
 
 class ProductForm(forms.ModelForm):
+    tags_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter tags separated by commas'
+        }),
+        help_text="Enter tags separated by commas"
+    )
+    
     class Meta:
         model = Product
-        fields = ['name', 'sku', 'description', 'category', 'unit_price']
+        fields = ['name', 'sku', 'description', 'category', 'sale_price', 'purchase_price', 'image']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'sku': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'category': forms.TextInput(attrs={'class': 'form-control'}),
-            'unit_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'sale_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'purchase_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['tags_input'].initial = ', '.join(self.instance.tag_list)
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        tags_input = self.cleaned_data.get('tags_input', '')
+        if tags_input:
+            tag_list = [tag.strip() for tag in tags_input.split(',') if tag.strip()]
+            instance.set_tags(tag_list)
+        else:
+            instance.tags = ''
+        
+        if commit:
+            instance.save()
+        return instance
 
 
 class AnalyticalAccountForm(forms.ModelForm):

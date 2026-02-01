@@ -7,26 +7,30 @@
     <div class="page-title">{{ title }}</div>
 
     <div class="card">
-        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+        <form method="post" style="display: flex; flex-direction: column; gap: 25px;">
             {% csrf_token %}
             
-            <div class="form-group">
-                <label>Budget Name *</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
-                {% endif %}
+            <!-- First Row: Budget Name and Analytical Account -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                <div class="form-group">
+                    <label>Budget Name *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Analytical Account *</label>
+                    {{ form.analytical_account }}
+                    {% if form.analytical_account.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.analytical_account.errors.0 }}</div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Analytical Account *</label>
-                {{ form.analytical_account }}
-                {% if form.analytical_account.errors %}
-                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.analytical_account.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <!-- Second Row: Start Date and End Date -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
                 <div class="form-group">
                     <label>Start Date *</label>
                     {{ form.start_date }}
@@ -44,6 +48,7 @@
                 </div>
             </div>
 
+            <!-- Budgeted Amount -->
             <div class="form-group">
                 <label>Budgeted Amount *</label>
                 {{ form.budgeted_amount }}
@@ -52,6 +57,7 @@
                 {% endif %}
             </div>
 
+            <!-- Notes Section -->
             <div class="form-group">
                 <label>Notes</label>
                 {{ form.notes }}
@@ -61,13 +67,15 @@
             </div>
 
             {% if budget %}
+            <!-- Revision Reason -->
             <div class="form-group">
                 <label>Revision Reason (if changing amount)</label>
                 <input type="text" name="revision_reason" class="form-control" placeholder="Reason for budget revision">
             </div>
             {% endif %}
 
-            <div style="display:flex; gap:15px; margin-top:10px;">
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 10px;">
                 <button type="submit" class="btn-primary">Save Budget</button>
                 <a href="{% url 'budget_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
             </div>

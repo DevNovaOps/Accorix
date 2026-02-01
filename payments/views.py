@@ -203,7 +203,7 @@ def handle_payment_succeeded(payment_intent):
                 payment_number=f'STRIPE-{stripe_payment.id}',
                 date=timezone.now().date(),
                 amount=stripe_payment.amount,
-                payment_method='online',
+                payment_method='stripe',
                 reference=stripe_payment.stripe_payment_intent_id,
                 customer_invoice=stripe_payment.customer_invoice,
                 created_by=stripe_payment.user,

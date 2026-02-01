@@ -1,58 +1,373 @@
 {% extends 'base.html' %}
 
-{% block title %}Analytical Accounts - ERP Budget{% endblock %}
+{% block title %}Analytics Master - ERP Budget{% endblock %}
+
+{% block extra_css %}
+<style>
+.analytics-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.master-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    height: fit-content;
+}
+
+.master-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #000;
+    padding: 15px 20px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.master-tabs {
+    display: flex;
+    background: var(--input-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.master-tab {
+    flex: 1;
+    padding: 10px 15px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.master-tab:last-child {
+    border-right: none;
+}
+
+.master-tab.active {
+    background: var(--card);
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+}
+
+.master-tab:hover {
+    background: var(--hover);
+    color: var(--primary);
+}
+
+.master-content {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.analytics-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.analytics-item {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.analytics-item:hover {
+    background: var(--hover);
+    border-color: var(--primary);
+    transform: translateX(5px);
+}
+
+.analytics-item.selected {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+.auto-model-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: start;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-control {
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--hover);
+}
+
+.model-explanation {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.model-explanation h4 {
+    color: var(--text);
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+}
+
+.example-text {
+    background: rgba(0,245,255,0.1);
+    border-left: 3px solid var(--primary);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 0 6px 6px 0;
+}
+
+.status-tabs {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    padding: 5px;
+}
+
+.status-tab {
+    padding: 6px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--muted);
+}
+
+.status-tab.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+.status-tab:hover {
+    background: var(--hover);
+    color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .analytics-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="view-section active">
-    <div class="page-title">
-        Analytical Accounts
-        <a href="{% url 'analytical_account_create' %}" class="btn-primary">+ Create Account</a>
-    </div>
+    <div class="page-title">Analytics Master</div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for account in accounts %}
-                <tr>
-                    <td style="font-family:monospace; font-weight:600;">{{ account.code }}</td>
-                    <td>{{ account.name }}</td>
-                    <td style="color:var(--muted);">{{ account.description|truncatewords:10|default:"-" }}</td>
-                    <td>
-                        <span class="status-badge {% if account.is_active %}status-paid{% else %}status-not-paid{% endif %}">
-                            {% if account.is_active %}Active{% else %}Archived{% endif %}
-                        </span>
-                    </td>
-                    <td>
-                        {% if user.role == 'admin' %}
-                        <div style="display:flex; gap:10px;">
-                            <a href="{% url 'analytical_account_edit' account.pk %}" style="color:var(--primary);">Edit</a>
-                            {% if account.is_active %}
-                            <a href="{% url 'analytical_account_archive' account.pk %}" style="color:var(--danger);">Archive</a>
-                            {% endif %}
+    <div class="analytics-container">
+        <!-- Analytics Master Panel -->
+        <div class="master-container">
+            <div class="master-header">Analytics Master</div>
+            
+            <div class="master-tabs">
+                <div class="master-tab active" data-tab="new">New</div>
+                <div class="master-tab" data-tab="confirm">Confirm</div>
+                <div class="master-tab" data-tab="archived">Archived</div>
+                <div class="master-tab" onclick="window.location='{% url 'dashboard' %}'">Home</div>
+                <div class="master-tab" onclick="window.location='{% url 'dashboard' %}'">Back</div>
+            </div>
+
+            <div class="master-content">
+                <ul class="analytics-list">
+                    {% for account in accounts %}
+                    <li class="analytics-item" data-account="{{ account.id }}">
+                        {{ account.name }}
+                    </li>
+                    {% empty %}
+                    <li style="text-align: center; color: var(--muted); padding: 20px;">
+                        No analytical accounts found.
+                        <br><a href="{% url 'analytical_account_create' %}" style="color: var(--primary);">Create one</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Auto Analytical Model Panel -->
+        <div class="master-container">
+            <div class="master-header">Auto Analytical Model</div>
+            
+            <div class="master-tabs">
+                <div class="master-tab active" data-tab="new">New</div>
+                <div class="master-tab" data-tab="confirm">Confirm</div>
+                <div class="master-tab" data-tab="archived">Archived</div>
+                <div class="status-tabs">
+                    <div class="status-tab">Draft</div>
+                    <div class="status-tab active">Confirm</div>
+                    <div class="status-tab">Cancelled</div>
+                </div>
+            </div>
+
+            <div class="master-content">
+                <form method="post" action="{% url 'auto_analytical_model_create' %}" class="auto-model-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Partner Tag</label>
+                            <select class="form-control" name="contact_type">
+                                <option value="">Many to One ( From list )</option>
+                                <option value="customer">Customer</option>
+                                <option value="vendor">Vendor</option>
+                                <option value="both">Both</option>
+                            </select>
                         </div>
-                        {% else %}
-                        <span style="color:var(--muted);">-</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align:center; color:var(--muted); padding:40px;">
-                        No analytical accounts found. <a href="{% url 'analytical_account_create' %}" style="color:var(--primary);">Create your first account</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <div class="form-group">
+                            <label>Partner</label>
+                            <select class="form-control" name="partner">
+                                <option value="">Many to One ( From list )</option>
+                                {% for contact in contacts %}
+                                <option value="{{ contact.id }}">{{ contact.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Product Category</label>
+                            <select class="form-control" name="product_category">
+                                <option value="">Many to One ( From list )</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Books">Books</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select class="form-control" name="product_name_contains">
+                                <option value="">Many to One ( From list )</option>
+                                {% for product in products %}
+                                <option value="{{ product.name }}">{{ product.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Auto Apply Analytical Model</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" class="form-control" name="name" placeholder="Deepawali" style="flex: 1;" required>
+                            <select class="form-control" name="analytical_account" style="flex: 2;" required>
+                                <option value="">Many to One ( From analytical master list )</option>
+                                {% for account in accounts %}
+                                <option value="{{ account.id }}">{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="submit" class="btn-primary">Save Model</button>
+                        <a href="{% url 'analytical_account_list' %}" class="btn-secondary" style="text-decoration: none; display: inline-block; text-align: center;">Cancel</a>
+                    </div>
+                </form>
+
+                <div class="model-explanation">
+                    <h4>How Auto Analytical Model Works:</h4>
+                    <p>The model is applied if any one field matches the transaction line.</p>
+                    <p>If multiple fields match, the model becomes more specific and takes priority.</p>
+                    <p>Models with fewer matched fields are more generic, while more matches make them stricter.</p>
+                    <p>This allows flexible yet prioritized automatic analytic model.</p>
+                    
+                    <div class="example-text">
+                        <strong>Example:</strong><br>
+                        In the above model, the Product Category is Wooden Furniture and the Partner is Mr. A.<br>
+                        When the customer or vendor selected is Mr. A and the product belongs to the<br>
+                        Wooden Furniture category, this analytic distribution will be applied.<br>
+                        If no partner is selected, the distribution will still apply whenever the selected product<br>
+                        falls under the Wooden Furniture category.<br>
+                        Hence, more selected fields make the rule stricter, while fewer selections make it more generic.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+// Analytics item selection
+document.querySelectorAll('.analytics-item').forEach(item => {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.analytics-item').forEach(i => i.classList.remove('selected'));
+        this.classList.add('selected');
+    });
+});
+
+// Tab functionality
+document.querySelectorAll('.master-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        if (this.dataset.tab && !['home', 'back'].includes(this.dataset.tab)) {
+            const container = this.closest('.master-container');
+            container.querySelectorAll('.master-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        }
+    });
+});
+
+// Status tab functionality
+document.querySelectorAll('.status-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+    });
+});
+</script>
 {% endblock %}

@@ -1,23 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Vendor Bills - ERP Budget{% endblock %}
+{% block title %}Vendor Bills - ACCORIX{% endblock %}
 
 {% block content %}
-<div class="view-section active">
-    <div class="page-title">
-        Vendor Bills
-        <a href="{% url 'vendor_bill_create' %}" class="btn-primary">+ Create Vendor Bill</a>
+<div class="page-title">
+    <div>
+        <h1>Vendor Bills</h1>
+        <p style="color: var(--muted); margin: 0;">Manage vendor bills and payments</p>
     </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'vendor_bill_create' %}" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+            </svg>
+            New Bill
+        </a>
+    </div>
+</div>
 
-    <div class="card">
+<!-- Filter Section -->
+<div class="card" style="margin-bottom: 20px;">
+    <form method="get" class="form-row">
+        <div class="form-group">
+            <label>Payment Status</label>
+            <select name="payment_status" class="form-control">
+                <option value="">All Statuses</option>
+                {% for value, label in payment_status_choices %}
+                <option value="{{ value }}" {% if current_payment_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Search</label>
+            <input type="text" name="search" class="form-control" placeholder="Search bills..." value="{{ search }}">
+        </div>
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn-primary">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Bills Table -->
+<div class="card">
+    <div style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>
                     <th>Bill #</th>
+                    <th>Vendor</th>
                     <th>Date</th>
-                    <th>Contact</th>
+                    <th>Due Date</th>
                     <th>Amount</th>
-                    <th>Status</th>
                     <th>Payment Status</th>
                     <th>Actions</th>
                 </tr>
@@ -25,35 +59,175 @@
             <tbody>
                 {% for bill in bills %}
                 <tr>
-                    <td>{{ bill.transaction_number }}</td>
-                    <td>{{ bill.date }}</td>
-                    <td>{{ bill.contact.name }}</td>
-                    <td>₹{{ bill.total_amount|floatformat:2 }}</td>
                     <td>
-                        <span class="status-badge {% if bill.status == 'posted' %}status-paid{% elif bill.status == 'draft' %}status-draft{% else %}status-not-paid{% endif %}">
-                            {{ bill.get_status_display }}
-                        </span>
+                        <strong style="color: var(--secondary);">{{ bill.transaction_number }}</strong>
+                        {% if bill.bill_number %}
+                        <div style="font-size: 0.8rem; color: var(--muted);">{{ bill.bill_number }}</div>
+                        {% endif %}
                     </td>
                     <td>
-                        <span class="status-badge {% if bill.payment_status == 'paid' %}status-paid{% elif bill.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                        <div>{{ bill.contact.name }}</div>
+                        <div style="font-size: 0.8rem; color: var(--muted);">{{ bill.contact.email }}</div>
+                    </td>
+                    <td>{{ bill.date|date:"M d, Y" }}</td>
+                    <td>
+                        {{ bill.due_date|date:"M d, Y" }}
+                        {% if bill.due_date < today and bill.payment_status != 'paid' %}
+                        <div style="font-size: 0.8rem; color: var(--danger);">Overdue</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">₹{{ bill.total_amount|floatformat:2 }}</div>
+                        {% if bill.payment_status != 'not_paid' %}
+                        <div style="font-size: 0.8rem; color: var(--muted);">
+                            Paid: ₹{{ bill.paid_amount|floatformat:2 }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-badge 
+                            {% if bill.payment_status == 'paid' %}status-paid
+                            {% elif bill.payment_status == 'partially_paid' %}status-partially-paid
+                            {% else %}status-not-paid
+                            {% endif %}">
                             {{ bill.get_payment_status_display }}
                         </span>
                     </td>
                     <td>
-                        {% if bill.status == 'draft' %}
-                        <a href="{% url 'vendor_bill_post' bill.pk %}" style="color:var(--primary);">Post</a>
-                        {% endif %}
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="#" onclick="viewBill({{ bill.pk }})" 
+                               style="color: var(--primary); text-decoration: none;" title="View Details">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                                </svg>
+                            </a>
+                            
+                            <a href="{% url 'vendor_bill_pdf' bill.pk %}" 
+                               style="color: var(--danger); text-decoration: none;" title="Download PDF">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                            </a>
+                            
+                            {% if bill.status == 'draft' %}
+                            <a href="#" onclick="editBill({{ bill.pk }})" 
+                               style="color: var(--warning); text-decoration: none;" title="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                                </svg>
+                            </a>
+                            {% endif %}
+                            
+                            {% if bill.payment_status != 'paid' %}
+                            <a href="{% url 'bill_payment_create' bill.pk %}" 
+                               style="color: var(--success); text-decoration: none;" title="Record Payment">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z"/>
+                                </svg>
+                            </a>
+                            {% endif %}
+                            
+                            {% if bill.status == 'draft' %}
+                            <a href="{% url 'vendor_bill_post' bill.pk %}" 
+                               style="color: var(--primary); text-decoration: none;" title="Post Bill"
+                               onclick="return confirm('Are you sure you want to post this bill? This action cannot be undone.')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                                </svg>
+                            </a>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" style="text-align:center; color:var(--muted); padding:40px;">
-                        No bills found. <a href="{% url 'vendor_bill_create' %}" style="color:var(--primary);">Create your first bill</a>
+                    <td colspan="7" style="text-align: center; color: var(--muted); padding: 40px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.3; margin-bottom: 16px;">
+                            <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4Z"/>
+                        </svg>
+                        <div>No bills found</div>
+                        <div style="font-size: 0.9rem; margin-top: 8px;">
+                            <a href="{% url 'vendor_bill_create' %}" style="color: var(--primary);">Create your first bill</a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    
+    <!-- Pagination -->
+    {% if bills.has_other_pages %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+        {% if bills.has_previous %}
+            <a href="?page=1{% if request.GET.payment_status %}&payment_status={{ request.GET.payment_status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+               class="btn-secondary">First</a>
+            <a href="?page={{ bills.previous_page_number }}{% if request.GET.payment_status %}&payment_status={{ request.GET.payment_status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+               class="btn-secondary">Previous</a>
+        {% endif %}
+        
+        <span style="color: var(--text); font-weight: 500;">
+            Page {{ bills.number }} of {{ bills.paginator.num_pages }}
+        </span>
+        
+        {% if bills.has_next %}
+            <a href="?page={{ bills.next_page_number }}{% if request.GET.payment_status %}&payment_status={{ request.GET.payment_status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+               class="btn-secondary">Next</a>
+            <a href="?page={{ bills.paginator.num_pages }}{% if request.GET.payment_status %}&payment_status={{ request.GET.payment_status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+               class="btn-secondary">Last</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
+
+<!-- Bill Detail Modal -->
+<div id="billModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: var(--card); border-radius: 12px; padding: 30px; max-width: 800px; width: 90%; max-height: 90%; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: var(--text);">Bill Details</h2>
+            <button onclick="closeModal()" style="background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div id="billDetails">
+            <!-- Bill details will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewBill(billId) {
+    // Show modal with bill details
+    document.getElementById('billModal').style.display = 'flex';
+    
+    // Load bill details via AJAX (you can implement this)
+    document.getElementById('billDetails').innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--muted);">
+            Loading bill details...
+        </div>
+    `;
+    
+    // You can add AJAX call here to load full bill details
+}
+
+function closeModal() {
+    document.getElementById('billModal').style.display = 'none';
+}
+
+function editBill(billId) {
+    window.location.href = `/transactions/vendor-bills/${billId}/edit/`;
+}
+
+// Close modal when clicking outside
+document.getElementById('billModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+</script>
 {% endblock %}

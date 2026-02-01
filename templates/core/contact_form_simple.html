@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP Budget{% endblock %}
+
+{% block content %}
+<div class="view-section active">
+    <div class="page-title">{{ title }}</div>
+
+    <div class="card">
+        <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 25px;">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div style="background: rgba(239,68,68,0.15); border: 1px solid var(--danger); color: var(--danger); padding: 12px; border-radius: 8px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
+            <!-- First Row: Name and Email -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                <div class="form-group">
+                    <label>Contact Name *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Email *</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Second Row: Phone and Contact Type -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                <div class="form-group">
+                    <label>Phone</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Type *</label>
+                    {{ form.contact_type }}
+                    {% if form.contact_type.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.contact_type.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Address Section -->
+            <div class="form-group">
+                <label>Address</label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.address.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-group">
+                <label>Image</label>
+                {{ form.image }}
+                {% if form.image.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.image.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+                <label>Tags</label>
+                {{ form.tags_input }}
+                {% if form.tags_input.errors %}
+                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.tags_input.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 10px;">
+                <button type="submit" class="btn-primary">Save Contact</button>
+                <a href="{% url 'contact_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

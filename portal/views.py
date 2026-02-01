@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse
 from transactions.models import CustomerInvoice, VendorBill, PurchaseOrder, SalesOrder, Payment
+from transactions.views import generate_invoice_pdf, generate_bill_pdf
 from core.models import Contact
 from core.decorators import portal_user_required, customer_required, vendor_required
 from .forms import PaymentForm
@@ -131,7 +132,7 @@ def portal_payment_view(request, invoice_id=None, bill_id=None):
         form = PaymentForm(request.POST)
         if form.is_valid():
             payment = form.save(commit=False)
-            payment.payment_method = 'online'  # Portal payments are online
+            payment.payment_method = 'stripe'  # Portal payments are stripe
             payment.created_by = request.user
             payment.save()
             messages.success(request, 'Payment submitted successfully!')
@@ -164,3 +165,45 @@ def portal_payment_view(request, invoice_id=None, bill_id=None):
             form.fields['customer_invoice'].queryset = CustomerInvoice.objects.none()
     
     return render(request, 'portal/payment.html', {'form': form})
+
+
+@login_required
+@customer_required
+def portal_invoice_pdf(request, pk):
+    """Generate PDF for customer invoice - portal access"""
+    invoice = get_object_or_404(CustomerInvoice, pk=pk)
+    
+    # Verify ownership
+    if invoice.contact != request.user.contact:
+        messages.error(request, 'Access denied.')
+        return redirect('portal_dashboard')
+    
+    # Create PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Invoice_{invoice.transaction_number}.pdf"'
+    
+    # Generate PDF
+    generate_invoice_pdf(response, invoice)
+    
+    return response
+
+
+@login_required
+@vendor_required
+def portal_bill_pdf(request, pk):
+    """Generate PDF for vendor bill - portal access"""
+    bill = get_object_or_404(VendorBill, pk=pk)
+    
+    # Verify ownership
+    if bill.contact != request.user.contact:
+        messages.error(request, 'Access denied.')
+        return redirect('portal_dashboard')
+    
+    # Create PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Bill_{bill.transaction_number}.pdf"'
+    
+    # Generate PDF
+    generate_bill_pdf(response, bill)
+    
+    return response

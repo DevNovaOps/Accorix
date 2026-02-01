@@ -1,60 +1,426 @@
 {% extends 'base.html' %}
 
-{% block title %}Products - ERP Budget{% endblock %}
+{% block title %}Product Master - ERP Budget{% endblock %}
+
+{% block extra_css %}
+<style>
+.master-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.master-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #000;
+    padding: 20px 30px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.master-tabs {
+    display: flex;
+    background: var(--input-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.master-tab {
+    flex: 1;
+    padding: 15px 20px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.master-tab:last-child {
+    border-right: none;
+}
+
+.master-tab.active {
+    background: var(--card);
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+}
+
+.master-tab:hover {
+    background: var(--hover);
+    color: var(--primary);
+}
+
+.master-content {
+    padding: 30px;
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.list-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.enhanced-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.enhanced-table th {
+    background: var(--table-head-bg);
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 15px 12px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+}
+
+.enhanced-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.enhanced-table tr:hover {
+    background: var(--hover);
+}
+
+.product-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
+
+.product-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--input-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--muted);
+    border: 2px solid var(--border);
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.product-details h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.product-details p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-new {
+    background: rgba(245,158,11,0.15);
+    color: var(--warning);
+}
+
+.status-confirmed {
+    background: rgba(16,185,129,0.15);
+    color: var(--success);
+}
+
+.status-archived {
+    background: rgba(156,163,175,0.15);
+    color: var(--muted);
+}
+
+.category-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(0,245,255,0.15);
+    color: var(--primary);
+}
+
+.price-info {
+    text-align: right;
+}
+
+.price-main {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.price-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-edit {
+    background: var(--primary);
+    color: #000;
+}
+
+.btn-archive {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-edit:hover, .btn-archive:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+}
+
+.tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.tag-mini {
+    background: var(--secondary);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .master-tabs {
+        flex-direction: column;
+    }
+    
+    .master-tab {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .enhanced-table {
+        font-size: 0.8rem;
+    }
+    
+    .product-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="view-section active">
-    <div class="page-title">
-        Products
-        <a href="{% url 'product_create' %}" class="btn-primary">+ Create Product</a>
-    </div>
+    <div class="page-title">Product Master</div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>SKU</th>
-                    <th>Category</th>
-                    <th>Unit Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.sku }}</td>
-                    <td>{{ product.category|default:"-" }}</td>
-                    <td>₹{{ product.unit_price|floatformat:2 }}</td>
-                    <td>
-                        <span class="status-badge {% if product.is_active %}status-paid{% else %}status-not-paid{% endif %}">
-                            {% if product.is_active %}Active{% else %}Archived{% endif %}
-                        </span>
-                    </td>
-                    <td>
-                        {% if user.role == 'admin' %}
-                        <div style="display:flex; gap:10px;">
-                            <a href="{% url 'product_edit' product.pk %}" style="color:var(--primary);">Edit</a>
-                            {% if product.is_active %}
-                            <a href="{% url 'product_archive' product.pk %}" style="color:var(--danger);">Archive</a>
+    <div class="master-container">
+        <div class="master-header">Product Master</div>
+        
+        <div class="master-tabs">
+            <div class="master-tab active" data-status="new">New</div>
+            <div class="master-tab" data-status="confirmed">Confirmed</div>
+            <div class="master-tab" data-status="archived">Archived</div>
+            <div class="master-tab" onclick="window.location='{% url 'dashboard' %}'">Home</div>
+            <div class="master-tab" onclick="window.location='{% url 'dashboard' %}'">Back</div>
+        </div>
+
+        <div class="master-content">
+            <div class="list-header">
+                <div class="list-title">List View</div>
+                <a href="{% url 'product_create' %}" class="btn-primary">+ New Product</a>
+            </div>
+
+            <table class="enhanced-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Prices</th>
+                        <th>Status</th>
+                        <th>Tags</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    {% for product in products %}
+                    <tr data-status="{{ product.status|default:'new' }}">
+                        <td>
+                            <input type="checkbox" class="product-select" value="{{ product.id }}">
+                        </td>
+                        <td>
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                            {% else %}
+                                <div class="product-placeholder">
+                                    📦
+                                </div>
                             {% endif %}
-                        </div>
-                        {% else %}
-                        <span style="color:var(--muted);">-</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align:center; color:var(--muted); padding:40px;">
-                        No products found. <a href="{% url 'product_create' %}" style="color:var(--primary);">Create your first product</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        <td>
+                            <div class="product-info">
+                                <div class="product-details">
+                                    <h4>{{ product.name }}</h4>
+                                    <p>Created: {{ product.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <code style="background: var(--input-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">
+                                {{ product.sku }}
+                            </code>
+                        </td>
+                        <td>
+                            {% if product.category %}
+                                <span class="category-badge">{{ product.category }}</span>
+                            {% else %}
+                                <span style="color: var(--muted); font-size: 0.8rem;">No category</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="price-info">
+                                {% if product.sale_price %}
+                                    <div class="price-main">Sale: ₹{{ product.sale_price|floatformat:2 }}</div>
+                                {% endif %}
+                                {% if product.purchase_price %}
+                                    <div class="price-sub">Purchase: ₹{{ product.purchase_price|floatformat:2 }}</div>
+                                {% endif %}
+                                {% if product.sale_price and product.purchase_price %}
+                                    {% with margin=product.sale_price|add:product.purchase_price|add:"-"|add:product.purchase_price %}
+                                    <div class="price-sub" style="color: {% if product.sale_price > product.purchase_price %}var(--success){% else %}var(--danger){% endif %}">
+                                        Margin: ₹{{ product.sale_price|floatformat:2|add:"-"|add:product.purchase_price|floatformat:2 }}
+                                    </div>
+                                    {% endwith %}
+                                {% endif %}
+                                {% if not product.sale_price and not product.purchase_price %}
+                                    <span style="color: var(--muted); font-size: 0.8rem;">No prices set</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ product.status|default:'new' }}">
+                                {% if product.status %}{{ product.get_status_display }}{% else %}New{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="tags-list">
+                                {% for tag in product.tag_list %}
+                                    <span class="tag-mini">{{ tag }}</span>
+                                {% empty %}
+                                    <span style="color: var(--muted); font-size: 0.8rem;">No tags</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                            <div class="action-buttons">
+                                <a href="{% url 'product_edit' product.pk %}" class="action-btn btn-edit">Edit</a>
+                                {% if product.is_active %}
+                                <a href="{% url 'product_archive' product.pk %}" class="action-btn btn-archive" 
+                                   onclick="return confirm('Are you sure you want to archive this product?')">Archive</a>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span style="color: var(--muted);">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--muted);">
+                            No products found. <a href="{% url 'product_create' %}">Create your first product</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<script>
+// Tab functionality with filtering
+document.querySelectorAll('.master-tab[data-status]').forEach(tab => {
+    tab.addEventListener('click', function() {
+        const status = this.dataset.status;
+        
+        // Update active tab
+        document.querySelectorAll('.master-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Filter table rows
+        const rows = document.querySelectorAll('#productTableBody tr[data-status]');
+        rows.forEach(row => {
+            if (status === 'all' || row.dataset.status === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update list title
+        const listTitle = document.querySelector('.list-title');
+        listTitle.textContent = `${this.textContent} Products`;
+    });
+});
+
+// Select all functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Show only new products by default
+    const newTab = document.querySelector('.master-tab[data-status="new"]');
+    if (newTab) {
+        newTab.click();
+    }
+});
+</script>
 {% endblock %}

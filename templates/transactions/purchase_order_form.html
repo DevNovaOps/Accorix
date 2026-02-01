@@ -1,127 +1,705 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - ERP Budget{% endblock %}
+{% block title %}{{ title }} - ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Enhanced Form Styling */
+.transaction-form-container {
+    background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 1200px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #4a90e2;
+}
+
+.form-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.form-subtitle {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Budget Warning Styles */
+.budget-warning {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    border-left: 5px solid #fbbf24;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.budget-warning-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.budget-warning-icon {
+    font-size: 1.5rem;
+}
+
+.budget-details {
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.budget-detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.budget-detail-label {
+    font-weight: 600;
+}
+
+.budget-detail-value {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.budget-override-section {
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+/* Form Grid Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+/* Items Section */
+.items-section {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.items-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #4a90e2;
+}
+
+.items-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #4a90e2;
+}
+
+.add-item-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-item-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* Item Row Styling */
+.item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 2fr 1fr auto;
+    gap: 15px;
+    align-items: end;
+    padding: 15px;
+    background: #0f0f0f;
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.item-row:hover {
+    border-color: #4a90e2;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.1);
+}
+
+.item-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: #10b981;
+    text-align: right;
+    padding: 12px 0;
+}
+
+.delete-item-btn {
+    background: #ef4444;
+    color: #ffffff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.delete-item-btn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+/* Total Section */
+.total-section {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.total-label {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.total-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+}
+
+.btn-secondary {
+    background: #374151;
+    color: #d1d5db;
+    border: 1px solid #4b5563;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .item-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333;
+    border-top: 2px solid #4a90e2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="view-section active">
-    <div class="page-title">{{ title }}</div>
+<div class="transaction-form-container">
+    <div class="form-header">
+        <h1 class="form-title">{{ title }}</h1>
+        <p class="form-subtitle">Create a new purchase order with budget validation</p>
+    </div>
 
-    <div class="card">
-        <form method="post" id="poForm">
-            {% csrf_token %}
-            
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
-                <div class="form-group">
-                    <label>Date *</label>
-                    {{ form.date }}
-                </div>
-                <div class="form-group">
-                    <label>Contact *</label>
-                    {{ form.contact }}
-                </div>
-                <div class="form-group">
-                    <label>Analytical Account</label>
-                    {{ form.analytical_account }}
-                </div>
-                <div class="form-group">
-                    <label>Expected Delivery Date</label>
-                    {{ form.expected_delivery_date }}
-                </div>
+    {% if budget_warning %}
+    <div class="budget-warning">
+        <div class="budget-warning-header">
+            <span class="budget-warning-icon">⚠️</span>
+            Budget Limit Exceeded
+        </div>
+        <p>{{ budget_warning.message }}</p>
+        
+        {% if budget_warning.budget %}
+        <div class="budget-details">
+            <div class="budget-detail-row">
+                <span class="budget-detail-label">Budget Name:</span>
+                <span class="budget-detail-value">{{ budget_warning.budget.name }}</span>
             </div>
+            <div class="budget-detail-row">
+                <span class="budget-detail-label">Budgeted Amount:</span>
+                <span class="budget-detail-value">₹{{ budget_warning.budget.budgeted_amount|floatformat:2 }}</span>
+            </div>
+            <div class="budget-detail-row">
+                <span class="budget-detail-label">Current Actual:</span>
+                <span class="budget-detail-value">₹{{ budget_warning.budget.actual_amount|floatformat:2 }}</span>
+            </div>
+            <div class="budget-detail-row">
+                <span class="budget-detail-label">Exceeds By:</span>
+                <span class="budget-detail-value" style="color: #fbbf24;">₹{{ budget_warning.exceeds_by|floatformat:2 }}</span>
+            </div>
+        </div>
+        {% endif %}
 
-            <div class="form-group" style="margin-bottom:20px;">
-                <label>Notes</label>
+        {% if budget_override_form %}
+        <div class="budget-override-section">
+            <h4 style="margin-bottom: 15px;">Budget Override Required</h4>
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                {{ form.as_p }}
+                {{ formset.management_form }}
+                {% for form_item in formset %}
+                    {{ form_item.as_p }}
+                {% endfor %}
+                
+                <div class="form-group">
+                    <label class="form-label">{{ budget_override_form.override_reason.label }}</label>
+                    {{ budget_override_form.override_reason }}
+                </div>
+                
+                <div class="form-group" style="margin-top: 15px;">
+                    {{ budget_override_form.confirm_override }}
+                    <label for="{{ budget_override_form.confirm_override.id_for_label }}" style="margin-left: 8px;">
+                        {{ budget_override_form.confirm_override.label }}
+                    </label>
+                </div>
+                
+                <input type="hidden" name="budget_override" value="1">
+                <button type="submit" class="btn btn-danger" style="margin-top: 15px;">
+                    Override Budget & Create Purchase Order
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="post" id="purchase-order-form">
+        {% csrf_token %}
+        
+        <!-- Main Form Fields -->
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">{{ form.date.label }}</label>
+                {{ form.date }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form.contact.label }}</label>
+                {{ form.contact }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form.analytical_account.label }}</label>
+                {{ form.analytical_account }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form.expected_delivery_date.label }}</label>
+                {{ form.expected_delivery_date }}
+            </div>
+            
+            <div class="form-group full-width">
+                <label class="form-label">{{ form.notes.label }}</label>
                 {{ form.notes }}
             </div>
+        </div>
 
-            <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:15px; color:var(--text);">Items</h3>
-            <div id="itemsContainer" style="margin-bottom:20px;">
-                <div class="item-row card" style="margin-bottom:15px;">
-                    <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:15px; align-items:end;">
-                        <div class="form-group">
-                            <label>Product</label>
-                            <select name="product" class="form-control product-select">
-                                <option value="">Select Product</option>
-                                {% for product in products %}
-                                <option value="{{ product.pk }}" data-price="{{ product.unit_price }}">{{ product.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" name="quantity" step="0.01" min="0.01" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Unit Price</label>
-                            <input type="number" name="unit_price" step="0.01" min="0" class="form-control unit-price" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Total</label>
-                            <input type="text" class="form-control line-total" readonly style="background:var(--input-bg);">
-                        </div>
-                        <div>
-                            <button type="button" class="remove-item btn-secondary" style="width:100%;">Remove</button>
-                        </div>
+        <!-- Items Section -->
+        <div class="items-section">
+            <div class="items-header">
+                <h3 class="items-title">Purchase Order Items</h3>
+                <button type="button" class="add-item-btn" onclick="addItem()">
+                    <span>+</span> Add Item
+                </button>
+            </div>
+
+            {{ formset.management_form }}
+            <div id="items-container">
+                {% for form_item in formset %}
+                <div class="item-row" data-form-index="{{ forloop.counter0 }}">
+                    <div class="form-group">
+                        <label class="form-label">Product</label>
+                        {{ form_item.product }}
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        {{ form_item.quantity }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Unit Price</label>
+                        {{ form_item.unit_price }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Analytical Account</label>
+                        {{ form_item.analytical_account }}
+                    </div>
+                    
+                    <div class="item-total">
+                        ₹<span class="line-total">0.00</span>
+                    </div>
+                    
+                    <button type="button" class="delete-item-btn" onclick="removeItem(this)">
+                        Delete
+                    </button>
+                    
+                    {{ form_item.DELETE }}
                 </div>
+                {% endfor %}
             </div>
+        </div>
 
-            <button type="button" id="addItem" class="btn-secondary" style="margin-bottom:20px;">+ Add Item</button>
+        <!-- Total Section -->
+        <div class="total-section">
+            <div class="total-label">Total Purchase Order Amount</div>
+            <div class="total-amount">₹<span id="grand-total">0.00</span></div>
+        </div>
 
-            <div style="display:flex; gap:15px;">
-                <button type="submit" class="btn-primary">Save Purchase Order</button>
-                <a href="{% url 'purchase_order_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
-            </div>
-        </form>
-    </div>
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <span>💾</span> Create Purchase Order
+                <div class="loading-spinner"></div>
+            </button>
+            <a href="{% url 'purchase_order_list' %}" class="btn btn-secondary">
+                <span>↩️</span> Cancel
+            </a>
+        </div>
+    </form>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const itemsContainer = document.getElementById('itemsContainer');
-    const addItemBtn = document.getElementById('addItem');
+let itemIndex = {{ formset.total_form_count }};
+
+function addItem() {
+    const container = document.getElementById('items-container');
+    const emptyForm = document.querySelector('#empty-form').innerHTML;
+    const newForm = emptyForm.replace(/__prefix__/g, itemIndex);
     
-    function calculateLineTotal(row) {
-        const quantity = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
-        const price = parseFloat(row.querySelector('.unit-price').value) || 0;
-        const total = quantity * price;
-        row.querySelector('.line-total').value = total.toFixed(2);
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.setAttribute('data-form-index', itemIndex);
+    div.innerHTML = newForm;
+    
+    container.appendChild(div);
+    
+    // Update management form
+    const totalForms = document.querySelector('#id_items-TOTAL_FORMS');
+    totalForms.value = parseInt(totalForms.value) + 1;
+    
+    itemIndex++;
+    
+    // Add event listeners to new form
+    addItemEventListeners(div);
+}
+
+function removeItem(button) {
+    const itemRow = button.closest('.item-row');
+    const deleteInput = itemRow.querySelector('input[name$="-DELETE"]');
+    
+    if (deleteInput) {
+        deleteInput.checked = true;
+        itemRow.style.display = 'none';
+    } else {
+        itemRow.remove();
+        updateTotalForms();
     }
     
-    function addItemRow() {
-        const firstRow = itemsContainer.querySelector('.item-row');
-        const newRow = firstRow.cloneNode(true);
-        newRow.querySelector('input[name="quantity"]').value = '';
-        newRow.querySelector('.unit-price').value = '';
-        newRow.querySelector('.line-total').value = '';
-        newRow.querySelector('.product-select').value = '';
-        itemsContainer.appendChild(newRow);
+    calculateTotal();
+}
+
+function updateTotalForms() {
+    const totalForms = document.querySelector('#id_items-TOTAL_FORMS');
+    const visibleForms = document.querySelectorAll('.item-row:not([style*="display: none"])').length;
+    totalForms.value = visibleForms;
+}
+
+function addItemEventListeners(container) {
+    const productSelect = container.querySelector('select[name$="-product"]');
+    const quantityInput = container.querySelector('input[name$="-quantity"]');
+    const priceInput = container.querySelector('input[name$="-unit_price"]');
+    
+    if (productSelect) {
+        productSelect.addEventListener('change', function() {
+            loadProductPrice(this, priceInput);
+        });
     }
     
-    itemsContainer.addEventListener('change', function(e) {
-        if (e.target.classList.contains('product-select')) {
-            const price = e.target.options[e.target.selectedIndex].dataset.price;
-            const row = e.target.closest('.item-row');
-            row.querySelector('.unit-price').value = price || '';
-            calculateLineTotal(row);
+    if (quantityInput) {
+        quantityInput.addEventListener('input', function() {
+            calculateLineTotal(container);
+        });
+    }
+    
+    if (priceInput) {
+        priceInput.addEventListener('input', function() {
+            calculateLineTotal(container);
+        });
+    }
+}
+
+function loadProductPrice(productSelect, priceInput) {
+    const productId = productSelect.value;
+    if (productId) {
+        fetch(`/transactions/get-product-price/?product_id=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.purchase_price) {
+                    priceInput.value = data.purchase_price;
+                } else if (data.unit_price) {
+                    priceInput.value = data.unit_price;
+                }
+                calculateLineTotal(productSelect.closest('.item-row'));
+            })
+            .catch(error => console.error('Error loading product price:', error));
+    }
+}
+
+function calculateLineTotal(itemRow) {
+    const quantityInput = itemRow.querySelector('input[name$="-quantity"]');
+    const priceInput = itemRow.querySelector('input[name$="-unit_price"]');
+    const totalSpan = itemRow.querySelector('.line-total');
+    
+    const quantity = parseFloat(quantityInput.value) || 0;
+    const price = parseFloat(priceInput.value) || 0;
+    const total = quantity * price;
+    
+    totalSpan.textContent = total.toFixed(2);
+    calculateTotal();
+}
+
+function calculateTotal() {
+    const lineTotals = document.querySelectorAll('.line-total');
+    let grandTotal = 0;
+    
+    lineTotals.forEach(span => {
+        const itemRow = span.closest('.item-row');
+        if (itemRow.style.display !== 'none') {
+            grandTotal += parseFloat(span.textContent) || 0;
         }
     });
     
-    itemsContainer.addEventListener('input', function(e) {
-        if (e.target.name === 'quantity' || e.target.classList.contains('unit-price')) {
-            calculateLineTotal(e.target.closest('.item-row'));
-        }
-    });
+    document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
     
-    itemsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-item')) {
-            if (itemsContainer.querySelectorAll('.item-row').length > 1) {
-                e.target.closest('.item-row').remove();
+    // Validate budget if analytical account is selected
+    validateBudget(grandTotal);
+}
+
+function validateBudget(amount) {
+    const analyticalAccountSelect = document.querySelector('select[name="analytical_account"]');
+    const dateInput = document.querySelector('input[name="date"]');
+    
+    if (analyticalAccountSelect.value && dateInput.value && amount > 0) {
+        fetch('/transactions/validate-budget/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                analytical_account_id: analyticalAccountSelect.value,
+                amount: amount,
+                date: dateInput.value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle budget validation response
+            if (data.status === 'exceeds_budget') {
+                showBudgetWarning(data);
+            } else {
+                hideBudgetWarning();
             }
-        }
-    });
+        })
+        .catch(error => console.error('Budget validation error:', error));
+    }
+}
+
+function showBudgetWarning(data) {
+    // Implementation for showing budget warning
+    console.log('Budget warning:', data);
+}
+
+function hideBudgetWarning() {
+    // Implementation for hiding budget warning
+    console.log('Budget OK');
+}
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to existing items
+    document.querySelectorAll('.item-row').forEach(addItemEventListeners);
     
-    addItemBtn.addEventListener('click', addItemRow);
+    // Calculate initial total
+    calculateTotal();
+    
+    // Form submission handling
+    document.getElementById('purchase-order-form').addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.loading-spinner');
+        
+        submitBtn.disabled = true;
+        spinner.style.display = 'inline-block';
+    });
 });
 </script>
+
+<!-- Empty form template for adding new items -->
+<div id="empty-form" style="display: none;">
+    <div class="form-group">
+        <label class="form-label">Product</label>
+        <select name="items-__prefix__-product" class="form-control">
+            <option value="">Select Product</option>
+            {% for product in form.fields.contact.queryset %}
+            <option value="{{ product.id }}">{{ product.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Quantity</label>
+        <input type="number" name="items-__prefix__-quantity" class="form-control" step="0.01">
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Unit Price</label>
+        <input type="number" name="items-__prefix__-unit_price" class="form-control" step="0.01">
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Analytical Account</label>
+        <select name="items-__prefix__-analytical_account" class="form-control">
+            <option value="">Select Account</option>
+            {% for account in form.fields.analytical_account.queryset %}
+            <option value="{{ account.id }}">{{ account.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="item-total">
+        ₹<span class="line-total">0.00</span>
+    </div>
+    
+    <button type="button" class="delete-item-btn" onclick="removeItem(this)">
+        Delete
+    </button>
+</div>
 {% endblock %}

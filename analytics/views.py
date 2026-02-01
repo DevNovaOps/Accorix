@@ -52,22 +52,24 @@ def analytics_dashboard(request):
     budget_variance_chart = generate_budget_variance_chart()
     
     # KPIs
-    total_revenue = CustomerInvoice.objects.filter(
+    invoices = CustomerInvoice.objects.filter(
         status='posted', 
         date__range=[start_date, end_date]
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
-    
-    total_expenses = VendorBill.objects.filter(
+    )
+    bills = VendorBill.objects.filter(
         status='posted', 
         date__range=[start_date, end_date]
-    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    )
     
+    total_revenue = sum(invoice.total_amount for invoice in invoices)
+    total_expenses = sum(bill.total_amount for bill in bills)
     net_profit = total_revenue - total_expenses
     
-    outstanding_invoices = CustomerInvoice.objects.filter(
+    outstanding_invoices_qs = CustomerInvoice.objects.filter(
         status='posted',
         payment_status__in=['not_paid', 'partially_paid']
-    ).aggregate(total=Sum('remaining_amount'))['total'] or 0
+    )
+    outstanding_invoices = sum(invoice.remaining_amount for invoice in outstanding_invoices_qs)
     
     context = {
         'revenue_chart': revenue_chart,
@@ -101,15 +103,19 @@ def generate_revenue_expense_chart(start_date, end_date):
     while current_date <= end_date:
         next_month = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
         
-        month_revenue = CustomerInvoice.objects.filter(
+        # Get invoices for this month and calculate total
+        month_invoices = CustomerInvoice.objects.filter(
             status='posted',
             date__range=[current_date, next_month - timedelta(days=1)]
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        )
+        month_revenue = sum(invoice.total_amount for invoice in month_invoices)
         
-        month_expense = VendorBill.objects.filter(
+        # Get bills for this month and calculate total
+        month_bills = VendorBill.objects.filter(
             status='posted',
             date__range=[current_date, next_month - timedelta(days=1)]
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        )
+        month_expense = sum(bill.total_amount for bill in month_bills)
         
         months.append(current_date.strftime('%b %Y'))
         revenues.append(float(month_revenue))
@@ -168,15 +174,19 @@ def generate_monthly_trends_chart(start_date, end_date):
     while current_date <= end_date:
         next_month = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
         
-        month_revenue = CustomerInvoice.objects.filter(
+        # Get invoices for this month and calculate total
+        month_invoices = CustomerInvoice.objects.filter(
             status='posted',
             date__range=[current_date, next_month - timedelta(days=1)]
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        )
+        month_revenue = sum(invoice.total_amount for invoice in month_invoices)
         
-        month_expense = VendorBill.objects.filter(
+        # Get bills for this month and calculate total
+        month_bills = VendorBill.objects.filter(
             status='posted',
             date__range=[current_date, next_month - timedelta(days=1)]
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        )
+        month_expense = sum(bill.total_amount for bill in month_bills)
         
         months.append(current_date)
         revenues.append(float(month_revenue))
@@ -227,16 +237,20 @@ def generate_top_customers_chart():
     fig.patch.set_facecolor('#1a1a1a')
     ax.set_facecolor('#1a1a1a')
     
-    # Get top 10 customers by revenue
-    top_customers = CustomerInvoice.objects.filter(status='posted').values(
-        'contact__name'
-    ).annotate(
-        total_revenue=Sum('total_amount')
-    ).order_by('-total_revenue')[:10]
+    # Get all posted invoices grouped by customer
+    from collections import defaultdict
+    customer_totals = defaultdict(Decimal)
+    
+    invoices = CustomerInvoice.objects.filter(status='posted').select_related('contact')
+    for invoice in invoices:
+        customer_totals[invoice.contact.name] += invoice.total_amount
+    
+    # Get top 10 customers
+    top_customers = sorted(customer_totals.items(), key=lambda x: x[1], reverse=True)[:10]
     
     if top_customers:
-        labels = [customer['contact__name'] for customer in top_customers]
-        sizes = [float(customer['total_revenue']) for customer in top_customers]
+        labels = [customer[0] for customer in top_customers]
+        sizes = [float(customer[1]) for customer in top_customers]
         
         colors = plt.cm.Set3(np.linspace(0, 1, len(labels)))
         

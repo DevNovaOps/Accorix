@@ -1,7 +1,9 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from core.models import User, Contact, Product, AnalyticalAccount, AutoAnalyticalModel
 from decimal import Decimal
+import uuid
 
 
 class Transaction(models.Model):
@@ -22,9 +24,46 @@ class Transaction(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     
+    # Budget validation fields
+    budget_warning_shown = models.BooleanField(default=False)
+    budget_override = models.BooleanField(default=False)
+    budget_override_reason = models.TextField(blank=True)
+    
     class Meta:
         abstract = True
         ordering = ['-date', '-created_at']
+    
+    def validate_budget(self):
+        """Validate against budget limits"""
+        if not self.analytical_account:
+            return {'status': 'no_budget', 'message': 'No analytical account assigned'}
+        
+        # Get active budgets for this analytical account
+        from budgets.models import Budget
+        budgets = Budget.objects.filter(
+            analytical_account=self.analytical_account,
+            status='confirmed',
+            start_date__lte=self.date,
+            end_date__gte=self.date,
+            is_active=True
+        )
+        
+        if not budgets.exists():
+            return {'status': 'no_budget', 'message': 'No active budget found for this analytical account'}
+        
+        budget = budgets.first()
+        current_total = self.total_amount
+        
+        if budget.actual_amount + current_total > budget.budgeted_amount:
+            exceeds_by = (budget.actual_amount + current_total) - budget.budgeted_amount
+            return {
+                'status': 'exceeds_budget',
+                'message': f'Exceeds approved budget by ₹{exceeds_by:,.2f}',
+                'budget': budget,
+                'exceeds_by': exceeds_by
+            }
+        
+        return {'status': 'within_budget', 'message': 'Within budget limits', 'budget': budget}
 
 
 class PurchaseOrder(Transaction):
@@ -37,6 +76,11 @@ class PurchaseOrder(Transaction):
     @property
     def total_amount(self):
         return sum(item.line_total for item in self.items.all())
+    
+    def save(self, *args, **kwargs):
+        if not self.transaction_number:
+            self.transaction_number = f"PO{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
 
 
 class VendorBill(Transaction):
@@ -75,6 +119,11 @@ class VendorBill(Transaction):
         else:
             self.payment_status = 'partially_paid'
         self.save()
+    
+    def save(self, *args, **kwargs):
+        if not self.transaction_number:
+            self.transaction_number = f"VB{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
 
 
 class SalesOrder(Transaction):
@@ -87,6 +136,11 @@ class SalesOrder(Transaction):
     @property
     def total_amount(self):
         return sum(item.line_total for item in self.items.all())
+    
+    def save(self, *args, **kwargs):
+        if not self.transaction_number:
+            self.transaction_number = f"SO{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
 
 
 class CustomerInvoice(Transaction):
@@ -125,6 +179,11 @@ class CustomerInvoice(Transaction):
         else:
             self.payment_status = 'partially_paid'
         self.save()
+    
+    def save(self, *args, **kwargs):
+        if not self.transaction_number:
+            self.transaction_number = f"INV{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
 
 
 class TransactionItem(models.Model):
@@ -173,11 +232,10 @@ class CustomerInvoiceItem(TransactionItem):
 
 class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = [
-        ('cash', 'Cash'),
         ('bank_transfer', 'Bank Transfer'),
         ('credit_card', 'Credit Card'),
-        ('check', 'Check'),
         ('online', 'Online Payment'),
+        ('stripe', 'Stripe Payment'),
     ]
     
     payment_number = models.CharField(max_length=50, unique=True)
@@ -186,6 +244,10 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     reference = models.CharField(max_length=100, blank=True)
     notes = models.TextField(blank=True)
+    
+    # Stripe integration fields
+    stripe_payment_intent_id = models.CharField(max_length=255, blank=True)
+    stripe_status = models.CharField(max_length=50, blank=True)
     
     # Link to invoice or bill
     customer_invoice = models.ForeignKey(CustomerInvoice, on_delete=models.CASCADE, null=True, blank=True, related_name='payments')
@@ -202,9 +264,45 @@ class Payment(models.Model):
         return f"PAY-{self.payment_number}"
     
     def save(self, *args, **kwargs):
+        if not self.payment_number:
+            self.payment_number = f"PAY{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
         # Update payment status on related invoice/bill
         if self.customer_invoice:
             self.customer_invoice.update_payment_status()
         if self.vendor_bill:
             self.vendor_bill.update_payment_status()
+
+
+# Chart of Accounts
+class ChartOfAccounts(models.Model):
+    ACCOUNT_TYPES = [
+        ('assets', 'Assets'),
+        ('liabilities', 'Liabilities'),
+        ('equity', 'Equity'),
+        ('income', 'Income'),
+        ('expense', 'Expense'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('confirmed', 'Confirmed'),
+        ('archived', 'Archived'),
+    ]
+    
+    account_code = models.CharField(max_length=20, unique=True)
+    account_name = models.CharField(max_length=255)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    parent_account = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sub_accounts')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['account_code']
+        verbose_name = 'Chart of Account'
+        verbose_name_plural = 'Chart of Accounts'
+    
+    def __str__(self):
+        return f"{self.account_code} - {self.account_name}"

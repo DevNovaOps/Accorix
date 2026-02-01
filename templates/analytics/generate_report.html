@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Generate Custom Report - Accorix ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-form {
+        background: #2a2a2a;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 20px 0;
+        border: 1px solid #444;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-control {
+        background: #1a1a1a;
+        border: 1px solid #555;
+        color: #fff;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    
+    .form-control:focus {
+        background: #1a1a1a;
+        border-color: #00bcd4;
+        color: #fff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
+    }
+    
+    .btn-generate {
+        background: linear-gradient(135deg, #00bcd4, #e91e63);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        color: white;
+    }
+    
+    .report-info {
+        background: #1a1a1a;
+        border-left: 4px solid #00bcd4;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    label {
+        color: #00bcd4;
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+    select.form-control option {
+        background: #1a1a1a;
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-white">
+                    <i class="fas fa-chart-line me-2" style="color: #00bcd4;"></i>
+                    Generate Custom Report
+                </h2>
+                <a href="{% url 'analytics_dashboard' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="report-info">
+                <h5 class="text-white mb-2">
+                    <i class="fas fa-info-circle me-2" style="color: #00bcd4;"></i>
+                    Custom Report Generator
+                </h5>
+                <p class="text-light mb-0">
+                    Generate detailed financial reports with custom date ranges and analysis types. 
+                    Reports include visual charts and can be exported for further analysis.
+                </p>
+            </div>
+
+            <div class="report-form">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.name.id_for_label }}">
+                                    <i class="fas fa-file-alt me-2"></i>Report Name
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.report_type.id_for_label }}">
+                                    <i class="fas fa-chart-bar me-2"></i>Report Type
+                                </label>
+                                {{ form.report_type }}
+                                {% if form.report_type.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.report_type.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.start_date.id_for_label }}">
+                                    <i class="fas fa-calendar-alt me-2"></i>Start Date
+                                </label>
+                                {{ form.start_date }}
+                                {% if form.start_date.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.start_date.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.end_date.id_for_label }}">
+                                    <i class="fas fa-calendar-alt me-2"></i>End Date
+                                </label>
+                                {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.end_date.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if form.description %}
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}">
+                            <i class="fas fa-align-left me-2"></i>Description (Optional)
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-generate">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Types Info -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-dark border-info">
+                        <div class="card-body text-center">
+                            <i class="fas fa-dollar-sign fa-2x text-success mb-3"></i>
+                            <h6 class="text-white">Revenue Analysis</h6>
+                            <p class="text-muted small">Detailed revenue breakdown with trends and customer analysis</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark border-warning">
+                        <div class="card-body text-center">
+                            <i class="fas fa-receipt fa-2x text-warning mb-3"></i>
+                            <h6 class="text-white">Expense Analysis</h6>
+                            <p class="text-muted small">Comprehensive expense tracking with category breakdowns</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark border-primary">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-pie fa-2x text-primary mb-3"></i>
+                            <h6 class="text-white">Profit & Loss</h6>
+                            <p class="text-muted small">Complete P&L statement with profitability metrics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set default dates
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDate = document.querySelector('input[name="start_date"]');
+        const endDate = document.querySelector('input[name="end_date"]');
+        
+        if (startDate && !startDate.value) {
+            const today = new Date();
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            startDate.value = lastMonth.toISOString().split('T')[0];
+        }
+        
+        if (endDate && !endDate.value) {
+            const today = new Date();
+            endDate.value = today.toISOString().split('T')[0];
+        }
+    });
+</script>
+{% endblock %}

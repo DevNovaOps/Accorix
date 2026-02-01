@@ -1,0 +1,584 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ERP System{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Bill Payment List Styling */
+.payment-container {
+    background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 1400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f59e0b;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.page-subtitle {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Filter Section */
+.filter-section {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #f59e0b;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+}
+
+.filter-control {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #ffffff;
+    font-size: 0.85rem;
+}
+
+.filter-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+/* Bills Table */
+.bills-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #0f0f0f;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.bills-table th {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #000000;
+    font-weight: 700;
+    padding: 15px;
+    text-align: left;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bills-table td {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+.bills-table tbody tr {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.bills-table tbody tr:hover {
+    background: #1a1a1a;
+    transform: translateX(4px);
+}
+
+/* Bill Info Cell */
+.bill-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.bill-number {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.bill-vendor {
+    color: #f59e0b;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.bill-date {
+    color: #888;
+    font-size: 0.75rem;
+}
+
+/* Amount Cells */
+.amount-cell {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+.total-amount {
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.paid-amount {
+    color: #10b981;
+    font-size: 0.85rem;
+}
+
+.remaining-amount {
+    color: #ef4444;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-not-paid {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+}
+
+.status-partially-paid {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+}
+
+.status-paid {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+}
+
+/* Due Date Styling */
+.due-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+}
+
+.due-overdue {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.due-today {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.due-upcoming {
+    color: #10b981;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-pay {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+}
+
+.btn-pay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-view {
+    background: #374151;
+    color: #d1d5db;
+    border: 1px solid #4b5563;
+}
+
+.btn-view:hover {
+    background: #4b5563;
+}
+
+.btn-stripe {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff;
+}
+
+.btn-stripe:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Summary Cards */
+.summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.summary-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 5px;
+}
+
+.summary-count {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.summary-overdue .summary-value {
+    color: #ef4444;
+}
+
+.summary-today .summary-value {
+    color: #f59e0b;
+}
+
+.summary-total .summary-value {
+    color: #ffffff;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.empty-state-subtext {
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
+
+.empty-state-action {
+    color: #f59e0b;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.empty-state-action:hover {
+    background: #f59e0b;
+    color: #000000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bills-table {
+        font-size: 0.8rem;
+    }
+    
+    .bills-table th,
+    .bills-table td {
+        padding: 10px 8px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .summary-section {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.payment-container {
+    animation: fadeIn 0.6s ease-out;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="page-header">
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="page-subtitle">Manage and process vendor bill payments</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-section">
+        <div class="summary-card summary-overdue">
+            <div class="summary-title">Overdue Bills</div>
+            <div class="summary-value">₹{{ overdue_total|default:0|floatformat:0 }}</div>
+            <div class="summary-count">{{ overdue_count|default:0 }} bill{{ overdue_count|pluralize }}</div>
+        </div>
+        
+        <div class="summary-card summary-today">
+            <div class="summary-title">Due Today</div>
+            <div class="summary-value">₹{{ today_total|default:0|floatformat:0 }}</div>
+            <div class="summary-count">{{ today_count|default:0 }} bill{{ today_count|pluralize }}</div>
+        </div>
+        
+        <div class="summary-card summary-total">
+            <div class="summary-title">Total Outstanding</div>
+            <div class="summary-value">₹{{ total_outstanding|default:0|floatformat:0 }}</div>
+            <div class="summary-count">{{ bills.count }} bill{{ bills.count|pluralize }}</div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="get" class="filter-grid">
+            <div class="filter-group">
+                <label class="filter-label">Vendor</label>
+                <select name="vendor" class="filter-control">
+                    <option value="">All Vendors</option>
+                    {% for vendor in vendors %}
+                    <option value="{{ vendor.id }}" {% if request.GET.vendor == vendor.id|stringformat:"s" %}selected{% endif %}>
+                        {{ vendor.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Payment Status</label>
+                <select name="status" class="filter-control">
+                    <option value="">All Status</option>
+                    <option value="not_paid" {% if request.GET.status == "not_paid" %}selected{% endif %}>Not Paid</option>
+                    <option value="partially_paid" {% if request.GET.status == "partially_paid" %}selected{% endif %}>Partially Paid</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Due Date</label>
+                <select name="due_filter" class="filter-control">
+                    <option value="">All Dates</option>
+                    <option value="overdue" {% if request.GET.due_filter == "overdue" %}selected{% endif %}>Overdue</option>
+                    <option value="today" {% if request.GET.due_filter == "today" %}selected{% endif %}>Due Today</option>
+                    <option value="week" {% if request.GET.due_filter == "week" %}selected{% endif %}>Due This Week</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <button type="submit" class="filter-btn">
+                    🔍 Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bills Table -->
+    {% if bills %}
+    <table class="bills-table">
+        <thead>
+            <tr>
+                <th>Bill Information</th>
+                <th>Due Date</th>
+                <th>Total Amount</th>
+                <th>Paid Amount</th>
+                <th>Remaining</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bill in bills %}
+            <tr>
+                <td>
+                    <div class="bill-info">
+                        <div class="bill-number">{{ bill.transaction_number }}</div>
+                        <div class="bill-vendor">{{ bill.contact.name }}</div>
+                        <div class="bill-date">{{ bill.date|date:"d M Y" }}</div>
+                        {% if bill.bill_number %}
+                        <div class="bill-date">Ref: {{ bill.bill_number }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+                
+                <td>
+                    <div class="due-date {% if bill.due_date < today %}due-overdue{% elif bill.due_date == today %}due-today{% else %}due-upcoming{% endif %}">
+                        {{ bill.due_date|date:"d M Y" }}
+                        {% if bill.due_date < today %}
+                        <br><small>({{ bill.due_date|timesince }} overdue)</small>
+                        {% elif bill.due_date == today %}
+                        <br><small>(Due Today)</small>
+                        {% endif %}
+                    </div>
+                </td>
+                
+                <td class="amount-cell">
+                    <div class="total-amount">₹{{ bill.total_amount|floatformat:2 }}</div>
+                </td>
+                
+                <td class="amount-cell">
+                    <div class="paid-amount">₹{{ bill.paid_amount|floatformat:2 }}</div>
+                </td>
+                
+                <td class="amount-cell">
+                    <div class="remaining-amount">₹{{ bill.remaining_amount|floatformat:2 }}</div>
+                </td>
+                
+                <td>
+                    <span class="status-badge status-{{ bill.payment_status|slugify }}">
+                        {{ bill.get_payment_status_display }}
+                    </span>
+                </td>
+                
+                <td>
+                    <div class="action-buttons">
+                        {% if bill.remaining_amount > 0 %}
+                        <a href="{% url 'bill_payment_create' bill.id %}" class="action-btn btn-pay">
+                            💳 Pay
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'vendor_bill_detail' bill.id %}" class="action-btn btn-view">
+                            👁️ View
+                        </a>
+                        
+                        {% if bill.remaining_amount > 0 %}
+                        <a href="{% url 'stripe_payment' bill.id %}" class="action-btn btn-stripe">
+                            💎 Stripe
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">💳</div>
+        <div class="empty-state-text">No Bills Found</div>
+        <div class="empty-state-subtext">
+            {% if request.GET %}
+            No bills match your current filters. Try adjusting your search criteria.
+            {% else %}
+            All vendor bills have been paid or there are no bills to process.
+            {% endif %}
+        </div>
+        <a href="{% url 'vendor_bill_create' %}" class="empty-state-action">Create New Bill</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for table rows
+    document.querySelectorAll('.bills-table tbody tr').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Don't trigger if clicking on action buttons
+            if (!e.target.closest('.action-buttons')) {
+                const viewLink = this.querySelector('.btn-view');
+                if (viewLink) {
+                    window.location.href = viewLink.href;
+                }
+            }
+        });
+    });
+    
+    // Auto-refresh every 5 minutes to update due dates
+    setInterval(function() {
+        if (!document.hidden) {
+            window.location.reload();
+        }
+    }, 300000); // 5 minutes
+});
+</script>
+{% endblock %}

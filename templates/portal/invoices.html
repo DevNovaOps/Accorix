@@ -1,12 +1,17 @@
 {% extends 'portal_base.html' %}
 
-{% block title %}My Invoices - ERP Budget{% endblock %}
+{% block title %}My Invoices - ACCORIX Portal{% endblock %}
 
 {% block content %}
-<div class="view-section active">
-    <div class="page-title">My Invoices</div>
+<div class="page-title">
+    <div>
+        <h1>My Invoices</h1>
+        <p style="color: var(--muted); margin: 0;">View and manage your invoices</p>
+    </div>
+</div>
 
-    <div class="card">
+<div class="card">
+    <div style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>
@@ -21,26 +26,80 @@
             <tbody>
                 {% for invoice in invoices %}
                 <tr>
-                    <td>{{ invoice.transaction_number }}</td>
-                    <td>{{ invoice.date }}</td>
-                    <td>{{ invoice.due_date }}</td>
-                    <td>₹{{ invoice.total_amount|floatformat:2 }}</td>
                     <td>
-                        <span class="status-badge {% if invoice.payment_status == 'paid' %}status-paid{% elif invoice.payment_status == 'partially_paid' %}status-partially-paid{% else %}status-not-paid{% endif %}">
+                        <strong style="color: var(--primary);">{{ invoice.transaction_number }}</strong>
+                        {% if invoice.invoice_number %}
+                        <div style="font-size: 0.8rem; color: var(--muted);">{{ invoice.invoice_number }}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ invoice.date|date:"M d, Y" }}</td>
+                    <td>
+                        {{ invoice.due_date|date:"M d, Y" }}
+                        {% if invoice.due_date < today and invoice.payment_status != 'paid' %}
+                        <div style="font-size: 0.8rem; color: var(--danger);">Overdue</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">₹{{ invoice.total_amount|floatformat:2 }}</div>
+                        {% if invoice.payment_status != 'not_paid' %}
+                        <div style="font-size: 0.8rem; color: var(--muted);">
+                            Paid: ₹{{ invoice.paid_amount|floatformat:2 }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-badge 
+                            {% if invoice.payment_status == 'paid' %}status-paid
+                            {% elif invoice.payment_status == 'partially_paid' %}status-partially-paid
+                            {% else %}status-not-paid
+                            {% endif %}">
                             {{ invoice.get_payment_status_display }}
                         </span>
                     </td>
                     <td>
-                        <a href="{% url 'portal_invoice_detail' invoice.pk %}" style="color:var(--primary); margin-right:10px;">View</a>
-                        {% if invoice.payment_status != 'paid' %}
-                        <a href="{% url 'portal_payment_invoice' invoice.pk %}" style="color:var(--primary);">Pay</a>
-                        {% endif %}
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="{% url 'portal_invoice_detail' invoice.pk %}" 
+                               style="color: var(--primary); text-decoration: none;" title="View Details">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                                </svg>
+                            </a>
+                            
+                            <a href="{% url 'portal_invoice_pdf' invoice.pk %}" 
+                               style="color: var(--danger); text-decoration: none;" title="Download PDF">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                            </a>
+                            
+                            {% if invoice.payment_status != 'paid' %}
+                            <a href="{% url 'payment_page' invoice.pk %}" 
+                               style="color: var(--success); text-decoration: none;" title="Pay with Card">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M4,6H20V8H4V6M4,11H20V13H4V11M4,16H20V18H4V16Z"/>
+                                </svg>
+                            </a>
+                            
+                            <a href="{% url 'portal_payment_invoice' invoice.pk %}" 
+                               style="color: var(--warning); text-decoration: none;" title="Other Payment Methods">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z"/>
+                                </svg>
+                            </a>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="text-align:center; color:var(--muted); padding:40px;">
-                        No invoices found.
+                    <td colspan="6" style="text-align: center; color: var(--muted); padding: 40px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.3; margin-bottom: 16px;">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <div>No invoices found</div>
+                        <div style="font-size: 0.9rem; margin-top: 8px; color: var(--muted);">
+                            Your invoices will appear here once they are created
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -48,4 +107,40 @@
         </table>
     </div>
 </div>
+
+<!-- Summary Cards -->
+{% if invoices %}
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+    <div class="card" style="text-align: center; padding: 20px;">
+        <div style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">
+            Total Invoices
+        </div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">
+            {{ invoices|length }}
+        </div>
+    </div>
+    
+    <div class="card" style="text-align: center; padding: 20px;">
+        <div style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">
+            Total Amount
+        </div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--text);">
+            ₹{% widthratio invoices|length 1 1 as total %}
+            {% for invoice in invoices %}
+                {% if forloop.first %}{{ invoice.total_amount|floatformat:2 }}
+                {% else %}{% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="card" style="text-align: center; padding: 20px;">
+        <div style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">
+            Outstanding
+        </div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);">
+            ₹{% for invoice in invoices %}{% if invoice.payment_status != 'paid' %}{{ invoice.remaining_amount|add:0 }}{% endif %}{% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

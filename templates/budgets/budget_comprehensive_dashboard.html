@@ -1,0 +1,1067 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Comprehensive Dashboard - ERP Budget{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Reset and Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #0a0a0a !important;
+    color: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Main Container */
+.budget-comprehensive-container {
+    background: #0a0a0a;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+}
+
+.header-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+    background: #374151;
+    color: #d1d5db;
+    border: 1px solid #4b5563;
+}
+
+/* Layout Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 25px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.top-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.middle-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+
+.bottom-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+/* Panel Base Styles */
+.budget-panel {
+    background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+    border: 1px solid #333;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    position: relative;
+}
+
+/* Panel Headers */
+.panel-header {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #000000;
+    padding: 15px 20px;
+    text-align: center;
+    position: relative;
+}
+
+.panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.panel-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+.revision-indicator {
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Tab System */
+.panel-tabs {
+    display: flex;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.panel-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.panel-tab {
+    padding: 10px 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    border-right: 1px solid #333;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 70px;
+    text-align: center;
+}
+
+.panel-tab:last-child {
+    border-right: none;
+}
+
+.panel-tab.active {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #ffffff;
+}
+
+.panel-tab:hover:not(.active) {
+    background: #2a2a2a;
+    color: #ccc;
+}
+
+/* Table Styling */
+.budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    background: #0f0f0f;
+}
+
+.budget-table th {
+    background: #1a1a1a;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+    letter-spacing: 0.5px;
+}
+
+.budget-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #333;
+    vertical-align: middle;
+}
+
+.budget-table tbody tr {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.budget-table tbody tr:hover {
+    background: #1a1a1a;
+}
+
+/* Budget Name Cell */
+.budget-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-draft { background: #f59e0b; }
+.status-confirmed { background: #10b981; }
+.status-archived { background: #6b7280; }
+.status-cancelled { background: #ef4444; }
+
+.budget-meta {
+    color: #888;
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+}
+
+.budget-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-link {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.action-view { color: #4a90e2; }
+.action-view:hover { background: rgba(74, 144, 226, 0.1); }
+
+.action-revise { color: #f59e0b; }
+.action-revise:hover { background: rgba(245, 158, 11, 0.1); }
+
+.action-edit { color: #8b5cf6; }
+.action-edit:hover { background: rgba(139, 92, 246, 0.1); }
+
+/* Amount Cells */
+.amount-cell {
+    text-align: right;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.8rem;
+}
+
+.amount-positive { color: #10b981; }
+.amount-negative { color: #ef4444; }
+
+/* List View Specific */
+.list-view-panel {
+    position: relative;
+}
+
+.list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.list-table th {
+    background: #1a1a1a;
+    color: #4a90e2;
+    font-weight: 600;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 2px solid #333;
+}
+
+.list-table td {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.list-table tbody tr {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.list-table tbody tr:hover {
+    background: #1a1a1a;
+}
+
+/* Mini Pie Charts in Table */
+.mini-pie-chart {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: relative;
+    margin: 0 auto;
+}
+
+.mini-pie-chart[data-percentage="74"] {
+    background: conic-gradient(
+        #10b981 0deg 266deg,
+        #374151 266deg 360deg
+    );
+}
+
+.mini-pie-chart[data-percentage="85"] {
+    background: conic-gradient(
+        #10b981 0deg 306deg,
+        #374151 306deg 360deg
+    );
+}
+
+.mini-pie-chart[data-percentage="60"] {
+    background: conic-gradient(
+        #10b981 0deg 216deg,
+        #374151 216deg 360deg
+    );
+}
+
+/* Large Pie Chart */
+.chart-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.pie-section-title {
+    color: #4a90e2;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.pie-section-subtitle {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 30px;
+}
+
+.large-pie-chart {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #10b981 0deg 266deg,
+        #ef4444 266deg 360deg
+    );
+    position: relative;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.chart-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.chart-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.label-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.label-achieved { background: #10b981; }
+.label-balance { background: #ef4444; }
+
+.click-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #8b5cf6;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.click-arrow {
+    color: #f59e0b;
+    font-size: 1.2rem;
+}
+
+/* Field Explanation Panel */
+.explanation-panel {
+    padding: 20px;
+}
+
+.explanation-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4a90e2;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #4a90e2;
+    padding-bottom: 8px;
+}
+
+.field-item {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 6px;
+    border-left: 3px solid #4a90e2;
+}
+
+.field-title {
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 5px;
+    font-size: 0.85rem;
+}
+
+.field-description {
+    color: #888;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+/* Stage Mapping Panel */
+.mapping-panel {
+    padding: 20px;
+    position: relative;
+}
+
+.mapping-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #8b5cf6;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #8b5cf6;
+    padding-bottom: 8px;
+}
+
+.stage-mapping-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: #1a1a1a;
+    border-radius: 6px;
+    border-left: 3px solid #8b5cf6;
+}
+
+.stage-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.stage-info {
+    flex: 1;
+}
+
+.stage-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+}
+
+.stage-description {
+    color: #888;
+    font-size: 0.7rem;
+    line-height: 1.3;
+}
+
+.stage-output {
+    font-size: 0.7rem;
+    color: #8b5cf6;
+    font-weight: 600;
+}
+
+/* Special Badges */
+.special-badge {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.earnest-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.empty-state-action {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: 2px solid #4a90e2;
+    border-radius: 6px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.empty-state-action:hover {
+    background: #4a90e2;
+    color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .top-row,
+    .middle-row,
+    .bottom-row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .dashboard-grid {
+        gap: 20px;
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .budget-comprehensive-container {
+        padding: 15px;
+    }
+    
+    .budget-table th,
+    .budget-table td,
+    .list-table th,
+    .list-table td {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+    
+    .budget-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.budget-panel {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.budget-panel:nth-child(1) { animation-delay: 0s; }
+.budget-panel:nth-child(2) { animation-delay: 0.1s; }
+.budget-panel:nth-child(3) { animation-delay: 0.2s; }
+.budget-panel:nth-child(4) { animation-delay: 0.3s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="budget-comprehensive-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Budget Comprehensive Dashboard</h1>
+        <div class="header-actions">
+            <a href="{% url 'budget_create' %}" class="action-btn btn-primary">
+                <span>+</span> Create Budget
+            </a>
+            <a href="{% url 'budget_list' %}" class="action-btn btn-secondary">
+                List View
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Top Row: Two Budget Panels -->
+        <div class="top-row">
+            <!-- Left Panel: Original Budget -->
+            <div class="budget-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Budget</div>
+                    <div class="panel-subtitle">Form View of Original Budget</div>
+                    <div class="revision-indicator">In case it get revision</div>
+                </div>
+                
+                <div class="panel-tabs">
+                    <div class="panel-tab active" data-filter="all">New</div>
+                    <div class="panel-tab" data-filter="confirmed">Confirm</div>
+                    <div class="panel-tab" data-filter="revise">Revise</div>
+                    <div class="panel-tab" data-filter="archived">Archived</div>
+                    <div class="panel-tab" data-filter="draft">Draft</div>
+                    <div class="panel-tab" data-filter="confirmed">Confirm</div>
+                    <div class="panel-tab" data-filter="cancelled">Cancelled</div>
+                </div>
+
+                <div class="panel-content">
+                    <table class="budget-table">
+                        <thead>
+                            <tr>
+                                <th>Budget Name</th>
+                                <th>Type</th>
+                                <th>Budgeted Amount</th>
+                                <th>Achieved Amount</th>
+                                <th>Achieved %</th>
+                                <th>Amount to Achieve</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for budget in budgets %}
+                            <tr data-status="{{ budget.status }}" data-stage="{{ budget.stage }}">
+                                <td>
+                                    <div class="budget-name">
+                                        <span class="status-dot status-{{ budget.status }}"></span>
+                                        {{ budget.name }}
+                                    </div>
+                                    <div class="budget-meta">{{ budget.analytical_account.name }}</div>
+                                    <div class="budget-actions">
+                                        <a href="{% url 'budget_detail' budget.id %}" class="action-link action-view">View</a>
+                                        {% if budget.status == 'confirmed' %}
+                                        <a href="{% url 'budget_revise' budget.id %}" class="action-link action-revise">Revise</a>
+                                        {% endif %}
+                                        <a href="{% url 'budget_edit' budget.id %}" class="action-link action-edit">Edit</a>
+                                    </div>
+                                </td>
+                                <td>{{ budget.analytical_account.name }}</td>
+                                <td class="amount-cell">₹{{ budget.budgeted_amount|floatformat:0 }}</td>
+                                <td class="amount-cell">₹{{ budget.actual_amount|floatformat:0 }}</td>
+                                <td class="amount-cell">{{ budget.achievement_percentage|floatformat:1 }}%</td>
+                                <td class="amount-cell">₹{{ budget.remaining_balance|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📊</div>
+                                        <div class="empty-state-text">No budgets found</div>
+                                        <a href="{% url 'budget_create' %}" class="empty-state-action">Create Budget</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="special-badge">Amazing Aardvark</div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Revised Budget -->
+            <div class="budget-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Budget</div>
+                    <div class="panel-subtitle">Form View of Revised Budget</div>
+                </div>
+                
+                <div class="panel-tabs">
+                    <div class="panel-tab active" data-filter="all">New</div>
+                    <div class="panel-tab" data-filter="confirmed">Confirm</div>
+                    <div class="panel-tab" data-filter="revise">Revise</div>
+                    <div class="panel-tab" data-filter="archived">Archived</div>
+                    <div class="panel-tab" data-filter="draft">Draft</div>
+                    <div class="panel-tab" data-filter="confirmed">Confirm</div>
+                    <div class="panel-tab" data-filter="cancelled">Cancelled</div>
+                </div>
+
+                <div class="panel-content">
+                    <table class="budget-table">
+                        <thead>
+                            <tr>
+                                <th>Budget Name</th>
+                                <th>Type</th>
+                                <th>Budgeted Amount</th>
+                                <th>Achieved Amount</th>
+                                <th>Achieved %</th>
+                                <th>Amount to Achieve</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for budget in budgets %}
+                            {% if budget.revisions.exists %}
+                            <tr data-status="{{ budget.status }}" data-stage="{{ budget.stage }}">
+                                <td>
+                                    <div class="budget-name">
+                                        <span class="status-dot status-{{ budget.status }}"></span>
+                                        {{ budget.name }}
+                                        <span style="color: #f59e0b; font-size: 0.7rem; margin-left: 5px;">
+                                            ({{ budget.revisions.count }} revision{{ budget.revisions.count|pluralize }})
+                                        </span>
+                                    </div>
+                                    <div class="budget-meta">{{ budget.analytical_account.name }}</div>
+                                    <div class="budget-actions">
+                                        <a href="{% url 'budget_detail' budget.id %}" class="action-link action-view">View</a>
+                                        <a href="{% url 'budget_edit' budget.id %}" class="action-link action-edit">Edit</a>
+                                    </div>
+                                </td>
+                                <td>{{ budget.analytical_account.name }}</td>
+                                <td class="amount-cell">₹{{ budget.budgeted_amount|floatformat:0 }}</td>
+                                <td class="amount-cell">₹{{ budget.actual_amount|floatformat:0 }}</td>
+                                <td class="amount-cell">{{ budget.achievement_percentage|floatformat:1 }}%</td>
+                                <td class="amount-cell">₹{{ budget.remaining_balance|floatformat:0 }}</td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">🔄</div>
+                                        <div class="empty-state-text">No revised budgets found</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Row: List View + Pie Chart -->
+        <div class="middle-row">
+            <!-- List View Panel -->
+            <div class="budget-panel list-view-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Budget</div>
+                    <div class="panel-subtitle">List View</div>
+                </div>
+                
+                <div class="panel-tabs">
+                    <div class="panel-tab active">New</div>
+                </div>
+
+                <div class="panel-content">
+                    <table class="list-table">
+                        <thead>
+                            <tr>
+                                <th>Budget Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Pie Chart</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for budget in budgets|slice:":5" %}
+                            <tr onclick="openBudgetDetail('{{ budget.id }}')">
+                                <td>{{ budget.name }}</td>
+                                <td>{{ budget.start_date|date:"d/m/Y" }}</td>
+                                <td>{{ budget.end_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    <span style="color: #10b981; font-weight: 600;">Confirm</span>
+                                </td>
+                                <td>
+                                    <div class="mini-pie-chart" data-percentage="{{ budget.achievement_percentage|floatformat:0 }}"></div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📋</div>
+                                        <div class="empty-state-text">No budgets available</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="click-indicator">
+                        <span class="click-arrow">↗</span>
+                        Click line to open Form View
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart Panel -->
+            <div class="budget-panel chart-panel">
+                <div class="pie-section-title">Pie</div>
+                <div class="pie-section-subtitle">Achieved</div>
+                <div class="large-pie-chart"></div>
+                <div class="chart-labels">
+                    <div class="chart-label">
+                        <div class="label-dot label-achieved"></div>
+                        <span>Achieved</span>
+                    </div>
+                    <div class="chart-label">
+                        <div class="label-dot label-balance"></div>
+                        <span>Balance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Field Explanation + Stage Mapping -->
+        <div class="bottom-row">
+            <!-- Field Explanation Panel -->
+            <div class="budget-panel explanation-panel">
+                <div class="explanation-header">Field Explanation</div>
+                
+                <div class="field-item">
+                    <div class="field-title">Budget Name</div>
+                    <div class="field-description">
+                        Allows you to assign the name of the Budget that you want to track in case of it is not valid then it will not be valid in your budget, so that it will lead to new revision budget and revision to the original one.
+                    </div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Budget Period</div>
+                    <div class="field-description">Date</div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Budget Amount</div>
+                    <div class="field-description">Date</div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Type</div>
+                    <div class="field-description">
+                        Allows you to assign the type of Budget that you want to track in case of it is not valid then it will not be valid in your budget, so that it will lead to new revision budget and revision to the original one.
+                    </div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Analytical Account</div>
+                    <div class="field-description">Monetary</div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Achieved Amount</div>
+                    <div class="field-description">
+                        Only value for Confirmed Budget<br>
+                        Example: Following Formula<br>
+                        Budgeted Amount = 50% YTDBUDGET + 50% YTD
+                    </div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Achieved %</div>
+                    <div class="field-description">
+                        Only value for Confirmed Budget<br>
+                        Example: Following Formula<br>
+                        Budgeted Amount = 50% YTDBUDGET + 50% YTD
+                    </div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-title">Amount to Achieve</div>
+                    <div class="field-description">
+                        Only value for Confirmed Budget<br>
+                        Example: Following Formula<br>
+                        Budgeted Amount = 50% YTDBUDGET + 50% YTD
+                    </div>
+                </div>
+
+                <div class="special-badge">Amazing Aardvark</div>
+            </div>
+
+            <!-- Stage Mapping Panel -->
+            <div class="budget-panel mapping-panel">
+                <div class="mapping-header">Menu & Stage Mapping</div>
+                
+                <div class="stage-mapping-item">
+                    <div class="stage-color-dot" style="background: #10b981;"></div>
+                    <div class="stage-info">
+                        <div class="stage-name">New</div>
+                        <div class="stage-description">Here user can create a new fresh budget</div>
+                    </div>
+                    <div class="stage-output">Draft</div>
+                </div>
+
+                <div class="stage-mapping-item">
+                    <div class="stage-color-dot" style="background: #3b82f6;"></div>
+                    <div class="stage-info">
+                        <div class="stage-name">Confirm</div>
+                        <div class="stage-description">Here user can Confirm the Newly Created Budget</div>
+                    </div>
+                    <div class="stage-output">Confirm</div>
+                </div>
+
+                <div class="stage-mapping-item">
+                    <div class="stage-color-dot" style="background: #f59e0b;"></div>
+                    <div class="stage-info">
+                        <div class="stage-name">Revise</div>
+                        <div class="stage-description">Only Visible at Confirm Stage</div>
+                    </div>
+                    <div class="stage-output">Revised</div>
+                </div>
+
+                <div class="stage-mapping-item">
+                    <div class="stage-color-dot" style="background: #6b7280;"></div>
+                    <div class="stage-info">
+                        <div class="stage-name">Archived</div>
+                        <div class="stage-description">Here user can revise the confirmed budget i.e. Budgeted Expense was 2,50,000 now it became increased to available 3,00,000 - Therefore user can revise, and it will be visible in your budget, so that it will lead to new revision budget and revision to the original one.</div>
+                    </div>
+                    <div class="stage-output">Archived</div>
+                </div>
+
+                <div class="special-badge earnest-badge">Earnest Woodpecker</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Tab Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTabs();
+    initializeTableInteractions();
+    initializePieCharts();
+});
+
+function initializeTabs() {
+    document.querySelectorAll('.panel-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const panel = this.closest('.budget-panel');
+            const tabs = panel.querySelectorAll('.panel-tab');
+            const filter = this.dataset.filter;
+            
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter table rows if filter exists
+            if (filter) {
+                filterTableRows(panel, filter);
+            }
+        });
+    });
+}
+
+function filterTableRows(panel, filter) {
+    const tbody = panel.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr[data-status]');
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const stage = row.dataset.stage;
+        
+        let shouldShow = false;
+        
+        if (filter === 'all') {
+            shouldShow = true;
+        } else if (filter === 'revise') {
+            shouldShow = status === 'confirmed';
+        } else {
+            shouldShow = status === filter || stage === filter;
+        }
+        
+        row.style.display = shouldShow ? '' : 'none';
+    });
+}
+
+function initializeTableInteractions() {
+    document.querySelectorAll('.budget-table tbody tr, .list-table tbody tr').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    });
+    
+    document.querySelectorAll('.action-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+}
+
+function initializePieCharts() {
+    // Update mini pie charts based on actual data
+    document.querySelectorAll('.mini-pie-chart').forEach(chart => {
+        const percentage = parseInt(chart.dataset.percentage) || 74;
+        const degrees = (percentage / 100) * 360;
+        
+        chart.style.background = `conic-gradient(
+            #10b981 0deg ${degrees}deg,
+            #374151 ${degrees}deg 360deg
+        )`;
+    });
+}
+
+function openBudgetDetail(budgetId) {
+    const row = event.target.closest('tr');
+    row.style.opacity = '0.7';
+    setTimeout(() => {
+        window.location.href = `/budgets/${budgetId}/`;
+    }, 200);
+}
+</script>
+{% endblock %}

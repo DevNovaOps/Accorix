@@ -135,7 +135,7 @@ def contact_list_view(request):
 @login_required
 def contact_create_view(request):
     if request.method == 'POST':
-        form = ContactForm(request.POST)
+        form = ContactForm(request.POST, request.FILES)
         if form.is_valid():
             contact = form.save(commit=False)
             contact.created_by = request.user
@@ -194,6 +194,11 @@ def contact_create_view(request):
                 messages.success(request, 'Contact created successfully!')
             
             return redirect('contact_list')
+        else:
+            # Add form errors to messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ContactForm()
     
@@ -206,11 +211,16 @@ def contact_edit_view(request, pk):
     contact = get_object_or_404(Contact, pk=pk)
     
     if request.method == 'POST':
-        form = ContactForm(request.POST, instance=contact)
+        form = ContactForm(request.POST, request.FILES, instance=contact)
         if form.is_valid():
             form.save()
             messages.success(request, 'Contact updated successfully!')
             return redirect('contact_list')
+        else:
+            # Add form errors to messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ContactForm(instance=contact)
     
@@ -222,6 +232,7 @@ def contact_edit_view(request, pk):
 def contact_archive_view(request, pk):
     contact = get_object_or_404(Contact, pk=pk)
     contact.is_active = False
+    contact.status = 'archived'
     contact.save()
     messages.success(request, 'Contact archived successfully!')
     return redirect('contact_list')
@@ -236,13 +247,18 @@ def product_list_view(request):
 @login_required
 def product_create_view(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             product.created_by = request.user
             product.save()
             messages.success(request, 'Product created successfully!')
             return redirect('product_list')
+        else:
+            # Add form errors to messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ProductForm()
     
@@ -255,11 +271,16 @@ def product_edit_view(request, pk):
     product = get_object_or_404(Product, pk=pk)
     
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             messages.success(request, 'Product updated successfully!')
             return redirect('product_list')
+        else:
+            # Add form errors to messages for debugging
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ProductForm(instance=product)
     
@@ -271,6 +292,7 @@ def product_edit_view(request, pk):
 def product_archive_view(request, pk):
     product = get_object_or_404(Product, pk=pk)
     product.is_active = False
+    product.status = 'archived'
     product.save()
     messages.success(request, 'Product archived successfully!')
     return redirect('product_list')
@@ -279,7 +301,16 @@ def product_archive_view(request, pk):
 @login_required
 def analytical_account_list_view(request):
     accounts = AnalyticalAccount.objects.all()
-    return render(request, 'core/analytical_account_list.html', {'accounts': accounts})
+    contacts = Contact.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True)
+    
+    context = {
+        'accounts': accounts,
+        'contacts': contacts,
+        'products': products,
+    }
+    
+    return render(request, 'core/analytical_account_list.html', context)
 
 
 @login_required
@@ -372,3 +403,45 @@ def auto_analytical_model_archive_view(request, pk):
     model.save()
     messages.success(request, 'Auto Analytical Model archived successfully!')
     return redirect('auto_analytical_model_list')
+
+
+@login_required
+def analytics_master_view(request):
+    analytical_accounts = AnalyticalAccount.objects.filter(is_active=True)
+    contacts = Contact.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True)
+    
+    if request.method == 'POST':
+        # Handle auto analytical model creation
+        model_name = request.POST.get('model_name')
+        analytical_account_id = request.POST.get('analytical_account')
+        partner_tag = request.POST.get('partner_tag')
+        partner_id = request.POST.get('partner')
+        product_category = request.POST.get('product_category')
+        product_id = request.POST.get('product')
+        
+        if model_name and analytical_account_id:
+            try:
+                analytical_account = AnalyticalAccount.objects.get(id=analytical_account_id)
+                
+                # Create the auto analytical model
+                auto_model = AutoAnalyticalModel.objects.create(
+                    name=model_name,
+                    analytical_account=analytical_account,
+                    contact_type=partner_tag if partner_tag != 'Many to One ( From list )' else None,
+                    product_category=product_category if product_category != 'Many to One ( From list )' else None,
+                    created_by=request.user
+                )
+                
+                messages.success(request, f'Auto Analytical Model "{model_name}" created successfully!')
+                return redirect('analytics_master')
+            except Exception as e:
+                messages.error(request, f'Error creating model: {str(e)}')
+    
+    context = {
+        'analytical_accounts': analytical_accounts,
+        'contacts': contacts,
+        'products': products,
+    }
+    
+    return render(request, 'core/analytical_account_master.html', context)

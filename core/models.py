@@ -43,11 +43,20 @@ class Contact(models.Model):
         ('both', 'Both'),
     ]
     
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('confirmed', 'Confirmed'),
+        ('archived', 'Archived'),
+    ]
+    
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     contact_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='customer')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    image = models.ImageField(upload_to='contacts/', blank=True, null=True)
+    tags = models.TextField(blank=True, help_text="Comma-separated tags")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -58,14 +67,36 @@ class Contact(models.Model):
     
     def __str__(self):
         return self.name
+    
+    @property
+    def tag_list(self):
+        """Return tags as a list"""
+        if self.tags:
+            return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
+        return []
+    
+    def set_tags(self, tag_list):
+        """Set tags from a list"""
+        self.tags = ', '.join(tag_list) if tag_list else ''
 
 
 class Product(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('confirmed', 'Confirmed'),
+        ('archived', 'Archived'),
+    ]
+    
     name = models.CharField(max_length=255)
     sku = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    tags = models.TextField(blank=True, help_text="Comma-separated tags")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,13 +107,31 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
+    
+    @property
+    def tag_list(self):
+        """Return tags as a list"""
+        if self.tags:
+            return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
+        return []
+    
+    def set_tags(self, tag_list):
+        """Set tags from a list"""
+        self.tags = ', '.join(tag_list) if tag_list else ''
 
 
 class AnalyticalAccount(models.Model):
     """Cost Centers - tracks where money is being spent"""
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('confirmed', 'Confirmed'),
+        ('archived', 'Archived'),
+    ]
+    
     code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -97,9 +146,16 @@ class AnalyticalAccount(models.Model):
 
 class AutoAnalyticalModel(models.Model):
     """Rules to automatically link transactions to analytical accounts"""
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('confirmed', 'Confirmed'),
+        ('archived', 'Archived'),
+    ]
+    
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     analytical_account = models.ForeignKey(AnalyticalAccount, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     
     # Rule conditions
     product_category = models.CharField(max_length=100, blank=True, null=True)

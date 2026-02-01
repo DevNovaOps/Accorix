@@ -6,12 +6,29 @@ from decimal import Decimal
 
 class Budget(models.Model):
     """Budget defined for a specific period and analytical account"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('confirmed', 'Confirmed'),
+        ('archived', 'Archived'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    STAGE_CHOICES = [
+        ('planning', 'Planning'),
+        ('approved', 'Approved'),
+        ('active', 'Active'),
+        ('monitoring', 'Monitoring'),
+        ('closed', 'Closed'),
+    ]
+    
     name = models.CharField(max_length=255)
     analytical_account = models.ForeignKey(AnalyticalAccount, on_delete=models.CASCADE, related_name='budgets')
     start_date = models.DateField()
     end_date = models.DateField()
     budgeted_amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0'))])
     notes = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default='planning')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -81,3 +98,30 @@ class BudgetRevision(models.Model):
     
     def __str__(self):
         return f"Revision of {self.budget} - {self.revised_at}"
+
+
+class BudgetFieldExplanation(models.Model):
+    """Field explanations for budget interface"""
+    field_name = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=200)
+    explanation = models.TextField()
+    example = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.field_name} - {self.title}"
+
+
+class BudgetStageMapping(models.Model):
+    """Stage mapping configuration for budgets"""
+    stage = models.CharField(max_length=50)
+    description = models.TextField()
+    color_code = models.CharField(max_length=7, default='#000000')  # Hex color
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return f"{self.stage} - {self.description}"

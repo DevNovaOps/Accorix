@@ -7,25 +7,29 @@
     <div class="page-title">{{ title }}</div>
 
     <div class="card">
-        <form method="post" class="form-row" style="flex-direction:column; gap:20px;">
+        <form method="post" style="display: flex; flex-direction: column; gap: 25px;">
             {% csrf_token %}
             
-            <div class="form-group">
-                <label>Code *</label>
-                {{ form.code }}
-                {% if form.code.errors %}
-                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.code.errors.0 }}</div>
-                {% endif %}
+            <!-- First Row: Code and Name -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                <div class="form-group">
+                    <label>Code *</label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.code.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Name *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Name *</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <div style="color:var(--danger); font-size:0.85rem; margin-top:5px;">{{ form.name.errors.0 }}</div>
-                {% endif %}
-            </div>
-
+            <!-- Description Section -->
             <div class="form-group">
                 <label>Description</label>
                 {{ form.description }}
@@ -34,7 +38,8 @@
                 {% endif %}
             </div>
 
-            <div style="display:flex; gap:15px; margin-top:10px;">
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 10px;">
                 <button type="submit" class="btn-primary">Save Account</button>
                 <a href="{% url 'analytical_account_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
             </div>

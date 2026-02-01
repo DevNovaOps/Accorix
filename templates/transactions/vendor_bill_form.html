@@ -1,131 +1,590 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - ERP Budget{% endblock %}
+{% block title %}{{ title }} - ACCORIX{% endblock %}
+
+{% block extra_css %}
+<style>
+.bill-form-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.bill-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 30px;
+}
+
+.bill-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.bill-actions {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.bill-number-display {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+    min-width: 200px;
+}
+
+.items-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.items-table th {
+    background: var(--table-head-bg);
+    padding: 12px 8px;
+    text-align: left;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+}
+
+.items-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+
+.item-row {
+    transition: var(--transition);
+}
+
+.item-row:hover {
+    background: var(--hover);
+}
+
+.item-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.item-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--hover);
+}
+
+.item-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.add-item-btn {
+    background: var(--secondary);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.add-item-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.remove-item-btn {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.remove-item-btn:hover {
+    opacity: 0.8;
+}
+
+.totals-section {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.total-row:last-child {
+    border-bottom: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.budget-warning {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid var(--warning);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 20px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.budget-warning-icon {
+    color: var(--warning);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.budget-override {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-draft {
+    background: rgba(156,163,175,0.15);
+    color: var(--muted);
+}
+
+.status-posted {
+    background: rgba(16,185,129,0.15);
+    color: var(--success);
+}
+
+@media (max-width: 768px) {
+    .bill-header {
+        grid-template-columns: 1fr;
+    }
+    
+    .bill-actions {
+        justify-content: center;
+    }
+    
+    .items-table {
+        font-size: 0.8rem;
+    }
+    
+    .items-table th,
+    .items-table td {
+        padding: 6px 4px;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="view-section active">
-    <div class="page-title">{{ title }}</div>
+<div class="bill-form-container">
+    <!-- Page Header -->
+    <div class="page-title">
+        <div>
+            <h1>{{ title }}</h1>
+            <p style="color: var(--muted); margin: 0;">
+                {% if bill %}Edit vendor bill details and line items{% else %}Create a new vendor bill{% endif %}
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'vendor_bill_list' %}" class="btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+                </svg>
+                Back to List
+            </a>
+        </div>
+    </div>
 
-    <div class="card">
-        <form method="post" id="billForm">
-            {% csrf_token %}
-            
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
-                <div class="form-group">
-                    <label>Date *</label>
-                    {{ form.date }}
-                </div>
-                <div class="form-group">
-                    <label>Contact *</label>
-                    {{ form.contact }}
-                </div>
-                <div class="form-group">
-                    <label>Analytical Account</label>
-                    {{ form.analytical_account }}
-                </div>
-                <div class="form-group">
-                    <label>Due Date *</label>
-                    {{ form.due_date }}
-                </div>
-                <div class="form-group">
-                    <label>Bill Number</label>
-                    {{ form.bill_number }}
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom:20px;">
-                <label>Notes</label>
-                {{ form.notes }}
-            </div>
-
-            <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:15px; color:var(--text);">Items</h3>
-            <div id="itemsContainer" style="margin-bottom:20px;">
-                <div class="item-row card" style="margin-bottom:15px;">
-                    <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:15px; align-items:end;">
-                        <div class="form-group">
-                            <label>Product</label>
-                            <select name="product" class="form-control product-select">
-                                <option value="">Select Product</option>
-                                {% for product in products %}
-                                <option value="{{ product.pk }}" data-price="{{ product.unit_price }}">{{ product.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" name="quantity" step="0.01" min="0.01" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Unit Price</label>
-                            <input type="number" name="unit_price" step="0.01" min="0" class="form-control unit-price" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Total</label>
-                            <input type="text" class="form-control line-total" readonly style="background:var(--input-bg);">
-                        </div>
-                        <div>
-                            <button type="button" class="remove-item btn-secondary" style="width:100%;">Remove</button>
-                        </div>
+    <form method="post" id="bill-form">
+        {% csrf_token %}
+        
+        <!-- Bill Header Information -->
+        <div class="card">
+            <div class="bill-header">
+                <div class="bill-info">
+                    <div class="form-group">
+                        <label for="{{ form.date.id_for_label }}">Bill Date *</label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                                {{ form.date.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.due_date.id_for_label }}">Due Date *</label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                                {{ form.due_date.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.contact.id_for_label }}">Vendor *</label>
+                        {{ form.contact }}
+                        {% if form.contact.errors %}
+                            <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                                {{ form.contact.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.bill_number.id_for_label }}">Bill Reference</label>
+                        {{ form.bill_number }}
+                        {% if form.bill_number.errors %}
+                            <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                                {{ form.bill_number.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.analytical_account.id_for_label }}">Analytical Account</label>
+                        {{ form.analytical_account }}
+                        {% if form.analytical_account.errors %}
+                            <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                                {{ form.analytical_account.errors.0 }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
+                
+                <div>
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <div style="font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">
+                            Bill Number
+                        </div>
+                        <div class="bill-number-display">
+                            {% if bill %}{{ bill.transaction_number }}{% else %}Auto-generated{% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if bill %}
+                    <div style="text-align: center;">
+                        <div class="status-indicator status-{{ bill.status }}">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                {% if bill.status == 'posted' %}
+                                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                {% else %}
+                                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z"/>
+                                {% endif %}
+                            </svg>
+                            {{ bill.get_status_display }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-
-            <button type="button" id="addItem" class="btn-secondary" style="margin-bottom:20px;">+ Add Item</button>
-
-            <div style="display:flex; gap:15px;">
-                <button type="submit" class="btn-primary">Save Bill</button>
-                <a href="{% url 'vendor_bill_list' %}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">Cancel</a>
+            
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div style="color: var(--danger); font-size: 0.9rem; margin-top: 4px;">
+                        {{ form.notes.errors.0 }}
+                    </div>
+                {% endif %}
             </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="items-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--text);">Bill Items</h3>
+                <button type="button" class="add-item-btn" onclick="addItem()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                    </svg>
+                    Add Item
+                </button>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Product</th>
+                            <th style="width: 15%;">Quantity</th>
+                            <th style="width: 15%;">Unit Price</th>
+                            <th style="width: 15%;">Total</th>
+                            <th style="width: 20%;">Analytical Account</th>
+                            <th style="width: 5%;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-tbody">
+                        <!-- Items will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Totals Section -->
+            <div class="totals-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">₹0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax (if applicable):</span>
+                    <span id="tax">₹0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Total Amount:</span>
+                    <span id="total">₹0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Warning (if applicable) -->
+        {% if budget_warning %}
+        <div class="budget-warning">
+            <div class="budget-warning-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                </svg>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: var(--warning);">Budget Warning</h4>
+                <p style="margin: 0; color: var(--text);">{{ budget_warning.message }}</p>
+                
+                {% if budget_warning.status == 'exceeds_budget' %}
+                <div class="budget-override">
+                    <h5 style="margin: 0 0 12px 0; color: var(--text);">Budget Override Required</h5>
+                    {% if budget_override_form %}
+                        <div class="form-group">
+                            <label>{{ budget_override_form.override_reason.label }}</label>
+                            {{ budget_override_form.override_reason }}
+                        </div>
+                        <div style="margin-top: 12px;">
+                            {{ budget_override_form.confirm_override }}
+                            <label for="{{ budget_override_form.confirm_override.id_for_label }}" style="margin-left: 8px;">
+                                {{ budget_override_form.confirm_override.label }}
+                            </label>
+                        </div>
+                        <input type="hidden" name="budget_override" value="1">
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Form Actions -->
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" name="action" value="save" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                </svg>
+                Save Bill
+            </button>
+            
+            {% if bill and bill.status == 'draft' %}
+            <button type="submit" name="action" value="post" class="btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                </svg>
+                Post Bill
+            </button>
+            {% endif %}
+            
+            <a href="{% url 'vendor_bill_list' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
 </div>
 
 <script>
+let itemCount = 0;
+const products = {{ products|safe }};
+const analyticalAccounts = {{ analytical_accounts|safe }};
+
+// Initialize form
 document.addEventListener('DOMContentLoaded', function() {
-    const itemsContainer = document.getElementById('itemsContainer');
-    const addItemBtn = document.getElementById('addItem');
+    addItem(); // Add first item row
     
-    function calculateLineTotal(row) {
-        const quantity = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
-        const price = parseFloat(row.querySelector('.unit-price').value) || 0;
-        const total = quantity * price;
-        row.querySelector('.line-total').value = total.toFixed(2);
+    // Set today's date if creating new bill
+    {% if not bill %}
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('{{ form.date.id_for_label }}').value = today;
+    
+    // Set due date to 30 days from today
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 30);
+    document.getElementById('{{ form.due_date.id_for_label }}').value = dueDate.toISOString().split('T')[0];
+    {% endif %}
+});
+
+function addItem() {
+    const tbody = document.getElementById('items-tbody');
+    const row = document.createElement('tr');
+    row.className = 'item-row';
+    row.innerHTML = `
+        <td>
+            <select name="items-${itemCount}-product" class="item-select" onchange="updatePrice(this, ${itemCount})" required>
+                <option value="">Select Product</option>
+                {% for product in products %}
+                <option value="{{ product.id }}" data-price="{{ product.unit_price }}">{{ product.name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="number" name="items-${itemCount}-quantity" class="item-input" 
+                   placeholder="1" step="0.01" min="0.01" onchange="calculateTotal(${itemCount})" required>
+        </td>
+        <td>
+            <input type="number" name="items-${itemCount}-unit_price" class="item-input" 
+                   placeholder="0.00" step="0.01" min="0" onchange="calculateTotal(${itemCount})" required>
+        </td>
+        <td>
+            <div style="padding: 8px 12px; font-weight: 600; color: var(--primary);" id="line-total-${itemCount}">
+                ₹0.00
+            </div>
+        </td>
+        <td>
+            <select name="items-${itemCount}-analytical_account" class="item-select">
+                <option value="">Select Account</option>
+                {% for account in analytical_accounts %}
+                <option value="{{ account.id }}">{{ account.code }} - {{ account.name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <button type="button" class="remove-item-btn" onclick="removeItem(this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                </svg>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(row);
+    itemCount++;
+}
+
+function removeItem(button) {
+    const row = button.closest('tr');
+    row.remove();
+    calculateGrandTotal();
+}
+
+function updatePrice(select, index) {
+    const selectedOption = select.options[select.selectedIndex];
+    const price = selectedOption.getAttribute('data-price') || '0';
+    const priceInput = document.querySelector(`input[name="items-${index}-unit_price"]`);
+    priceInput.value = price;
+    calculateTotal(index);
+}
+
+function calculateTotal(index) {
+    const quantity = parseFloat(document.querySelector(`input[name="items-${index}-quantity"]`).value) || 0;
+    const unitPrice = parseFloat(document.querySelector(`input[name="items-${index}-unit_price"]`).value) || 0;
+    const total = quantity * unitPrice;
+    
+    document.getElementById(`line-total-${index}`).textContent = `₹${total.toFixed(2)}`;
+    calculateGrandTotal();
+}
+
+function calculateGrandTotal() {
+    let subtotal = 0;
+    const rows = document.querySelectorAll('.item-row');
+    
+    rows.forEach((row, index) => {
+        const quantity = parseFloat(row.querySelector('input[name*="quantity"]').value) || 0;
+        const unitPrice = parseFloat(row.querySelector('input[name*="unit_price"]').value) || 0;
+        subtotal += quantity * unitPrice;
+    });
+    
+    const tax = 0; // Add tax calculation if needed
+    const total = subtotal + tax;
+    
+    document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('tax').textContent = `₹${tax.toFixed(2)}`;
+    document.getElementById('total').textContent = `₹${total.toFixed(2)}`;
+}
+
+// Form validation
+document.getElementById('bill-form').addEventListener('submit', function(e) {
+    const rows = document.querySelectorAll('.item-row');
+    if (rows.length === 0) {
+        e.preventDefault();
+        alert('Please add at least one item to the bill.');
+        return;
     }
     
-    function addItemRow() {
-        const firstRow = itemsContainer.querySelector('.item-row');
-        const newRow = firstRow.cloneNode(true);
-        newRow.querySelector('input[name="quantity"]').value = '';
-        newRow.querySelector('.unit-price').value = '';
-        newRow.querySelector('.line-total').value = '';
-        newRow.querySelector('.product-select').value = '';
-        itemsContainer.appendChild(newRow);
+    let hasValidItem = false;
+    rows.forEach(row => {
+        const product = row.querySelector('select[name*="product"]').value;
+        const quantity = row.querySelector('input[name*="quantity"]').value;
+        const price = row.querySelector('input[name*="unit_price"]').value;
+        
+        if (product && quantity && price) {
+            hasValidItem = true;
+        }
+    });
+    
+    if (!hasValidItem) {
+        e.preventDefault();
+        alert('Please fill in all required fields for at least one item.');
+        return;
     }
-    
-    itemsContainer.addEventListener('change', function(e) {
-        if (e.target.classList.contains('product-select')) {
-            const price = e.target.options[e.target.selectedIndex].dataset.price;
-            const row = e.target.closest('.item-row');
-            row.querySelector('.unit-price').value = price || '';
-            calculateLineTotal(row);
-        }
-    });
-    
-    itemsContainer.addEventListener('input', function(e) {
-        if (e.target.name === 'quantity' || e.target.classList.contains('unit-price')) {
-            calculateLineTotal(e.target.closest('.item-row'));
-        }
-    });
-    
-    itemsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-item')) {
-            if (itemsContainer.querySelectorAll('.item-row').length > 1) {
-                e.target.closest('.item-row').remove();
-            }
-        }
-    });
-    
-    addItemBtn.addEventListener('click', addItemRow);
 });
 </script>
 {% endblock %}
