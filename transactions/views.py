@@ -891,7 +891,7 @@ def generate_bill_pdf(response, bill):
     bill_details_data = [
         ['Bill Number:', bill.transaction_number, 'Bill Date:', bill.date.strftime('%d %B %Y')],
         ['Bill ID:', bill.bill_number or 'N/A', 'Due Date:', bill.due_date.strftime('%d %B %Y')],
-        ['Payment Status:', bill.get_payment_status_display(), 'Amount Due:', f"₹ {bill.remaining_amount:,.2f}"],
+        ['Payment Status:', bill.get_payment_status_display(), 'Amount Due:', f"Rs {bill.remaining_amount:,.2f}"],
     ]
     
     bill_details_table = Table(bill_details_data, colWidths=[1.2*inch, 2.6*inch, 1.2*inch, 2.5*inch])
@@ -965,9 +965,9 @@ def generate_bill_pdf(response, bill):
     
     # Summary Section - Connected columns
     summary_data = [
-        ['', '', 'Subtotal:', f"₹ {subtotal:,.2f}"],
-        ['', '', 'GST (18%):', f"₹ {tax_amount:,.2f}"],
-        ['', '', 'TOTAL AMOUNT:', f"₹ {total_amount:,.2f}"],
+        ['', '', 'Subtotal:', f"Rs {subtotal:,.2f}"],
+        ['', '', 'GST (18%):', f"Rs {tax_amount:,.2f}"],
+        ['', '', 'TOTAL AMOUNT:', f"Rs {total_amount:,.2f}"],
     ]
     
     summary_table = Table(summary_data, colWidths=[0.5*inch, 3.8*inch, 1.5*inch, 2.2*inch])
